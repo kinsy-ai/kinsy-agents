@@ -1,0 +1,12 @@
+{
+  "name": "kinsy-ai",
+  "interface": { "displayName": "Kinsy" },
+  "plugins": [
+    {
+      "name": "kinsy",
+      "source": "./",
+      "policy": { "installation": "AVAILABLE" },
+      "category": "Productivity"
+    }
+  ]
+}

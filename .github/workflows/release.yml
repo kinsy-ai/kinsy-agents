@@ -1,0 +1,33 @@
+# Publishes the CLI to npm when a tag `cli-v<version>` is pushed. Uses npm
+# trusted publishing (OIDC): no token in the repository. One-time setup on
+# npmjs.com: package `kinsy` → Settings → Trusted publishing → GitHub
+# Actions, repository kinsy-ai/kinsy-agents, workflow release.yml.
+name: Publish CLI
+
+on:
+  push:
+    tags: ["cli-v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@latest
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Tag matches package.json
+        run: test "cli-v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - run: npm publish --provenance --access public

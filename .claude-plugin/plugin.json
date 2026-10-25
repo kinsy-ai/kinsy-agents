@@ -1,0 +1,10 @@
+{
+  "name": "kinsy",
+  "version": "0.1.0",
+  "description": "A finished, editable PowerPoint deck from a brief and your documents, from the terminal. Adds the kinsy skill: when to use the Kinsy CLI, how to brief it, how to hand the .pptx back.",
+  "author": { "name": "Kinsy", "url": "https://kinsy.ai" },
+  "homepage": "https://kinsy.ai/docs/agents",
+  "repository": "https://github.com/kinsy-ai/kinsy-agents",
+  "license": "MIT",
+  "keywords": ["pptx", "powerpoint", "slides", "presentation", "deck", "skills", "cli"]
+}

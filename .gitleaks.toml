@@ -1,0 +1,21 @@
+title = "kinsy-agents"
+
+[extend]
+useDefault = true
+
+# Kinsy API keys: ksy_live_<url-safe base64>. The CLI tests use a key made of
+# a repeated letter, which this pattern still catches on purpose: real-looking
+# keys never belong in the repository.
+[[rules]]
+id = "kinsy-api-key"
+description = "Kinsy API key"
+regex = '''ksy_[a-z]+_[A-Za-z0-9_-]{20,}'''
+keywords = ["ksy_"]
+
+[allowlist]
+description = "the test fixture key (a repeated letter), the masked form in docs"
+regexes = [
+  '''ksy_live_a{39}wxyz''',
+  '''ksy_live_b{43}''',
+  '''ksy_live_…''',
+]

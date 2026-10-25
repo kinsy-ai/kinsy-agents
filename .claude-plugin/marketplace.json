@@ -1,0 +1,14 @@
+{
+  "name": "kinsy-ai",
+  "owner": { "name": "Kinsy", "url": "https://kinsy.ai" },
+  "description": "Kinsy for agents: finished, editable PowerPoint decks from a brief and your documents.",
+  "plugins": [
+    {
+      "name": "kinsy",
+      "source": ".",
+      "description": "A finished, editable PowerPoint deck from a brief and your documents, from the terminal. Adds the kinsy skill: when to use the Kinsy CLI, how to brief it, how to hand the .pptx back.",
+      "category": "productivity",
+      "tags": ["pptx", "powerpoint", "slides", "presentation", "deck"]
+    }
+  ]
+}

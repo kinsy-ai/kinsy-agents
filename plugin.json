@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kinsy",
+  "version": "0.1.0",
+  "description": "A finished, editable PowerPoint deck from a brief and your documents, from the terminal. Adds the kinsy skill: when to use the Kinsy CLI, how to brief it, how to hand the .pptx back.",
+  "author": { "name": "Kinsy", "url": "https://kinsy.ai" },
+  "homepage": "https://kinsy.ai/docs/agents",
+  "repository": "https://github.com/kinsy-ai/kinsy-agents",
+  "license": "MIT",
+  "keywords": ["pptx", "powerpoint", "slides", "presentation", "deck", "skills", "cli"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Kinsy",
+        "shortDescription": "Finished, editable PowerPoint decks from a brief and your documents.",
+        "longDescription": "Kinsy turns a brief and your source documents into a native PowerPoint file: real text boxes, tables and charts, embedded fonts and a slide master, with unsupported numbers flagged. This plugin adds the kinsy skill, which teaches an agent to build a deck with the Kinsy CLI and hand back the .pptx and a link to review and edit it. Keys spend the same credits as the web app; new accounts start with free credits.",
+        "developerName": "Kinsy",
+        "category": "Productivity",
+        "websiteURL": "https://kinsy.ai",
+        "privacyPolicyURL": "https://kinsy.ai/privacy",
+        "termsOfServiceURL": "https://kinsy.ai/terms",
+        "logo": "./assets/logo.png",
+        "brandColor": "#c7a14a"
+      }
+    }
+  }
+}
