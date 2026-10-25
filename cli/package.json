@@ -1,0 +1,32 @@
+{
+  "name": "kinsy",
+  "version": "0.1.0",
+  "description": "Command-line client for Kinsy: a finished, editable PowerPoint deck from a brief and your documents.",
+  "keywords": ["pptx", "powerpoint", "slides", "presentation", "deck", "cli", "agent"],
+  "homepage": "https://kinsy.ai/docs/cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kinsy-ai/kinsy-agents.git",
+    "directory": "cli"
+  },
+  "bugs": { "url": "https://github.com/kinsy-ai/kinsy-agents/issues" },
+  "license": "MIT",
+  "type": "module",
+  "bin": { "kinsy": "./dist/cli.js" },
+  "files": ["dist", "README.md"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "commander": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.4"
+  }
+}

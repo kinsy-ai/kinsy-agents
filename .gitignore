@@ -1,0 +1,8 @@
+node_modules/
+cli/dist/
+*.log
+.DS_Store
+*.pptx
+*.pdf
+.env
+.env.*
