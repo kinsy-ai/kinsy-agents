@@ -113,7 +113,12 @@ describe("kinsy login", () => {
   it("opens only http(s) links on kinsy.ai or the API host; anything else is printed, never opened", async () => {
     api = await startFakeApi({
       "POST /v1/auth/device": (_c, nth) => ({
-        json: { ...START, verification_uri_complete: nth === 1 ? "-a Calculator" : `${api!.url}/cli-auth?code=WXYZ-2345` },
+        json:
+          nth === 1
+            ? { ...START, verification_uri: "-a Calculator", verification_uri_complete: "-a Calculator" }
+            : nth === 2
+              ? { ...START, verification_uri: `${api!.url}/cli-auth`, verification_uri_complete: `${api!.url}/cli-auth?code=WXYZ-2345` }
+              : { ...START, verification_uri_complete: "https://kinsy.ai/cli-auth?code=WXYZ-2345&calc" },
       }),
       "POST /v1/auth/device/token": tokenSequence("approved"),
       "GET /v1/me": () => ({ json: ME }),
@@ -126,6 +131,10 @@ describe("kinsy login", () => {
     const own = makeCtx(api.url);
     expect(await runLogin({ browser: true, json: false }, own)).toBe(EXIT.OK);
     expect(own.opened).toEqual([`${api.url}/cli-auth?code=WXYZ-2345`]);
+    // a kinsy.ai link with a smuggled command separator is rebuilt from origin + path + code
+    const smuggle = makeCtx(api.url);
+    expect(await runLogin({ browser: true, json: false }, smuggle)).toBe(EXIT.OK);
+    expect(smuggle.opened).toEqual(["https://kinsy.ai/cli-auth?code=WXYZ-2345"]);
   });
 
   it("logout removes the file and says how to revoke; a second logout is still exit 0", async () => {

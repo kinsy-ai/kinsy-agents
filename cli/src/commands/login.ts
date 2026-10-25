@@ -62,6 +62,17 @@ export function isOpenableLink(url: string, apiBase: string): boolean {
   return allowed.has(parsed.host);
 }
 
+export function openTargetFor(start: DeviceStart): string | null {
+  const code = String(start.user_code ?? "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
+  if (!code) return null;
+  try {
+    const u = new URL(start.verification_uri);
+    return `${u.origin}${u.pathname}?code=${encodeURIComponent(code)}`;
+  } catch {
+    return null;
+  }
+}
+
 async function deviceLogin(opts: LoginOpts, ctx: Ctx): Promise<number> {
   const pub = publicClient(ctx);
   const start = await pub.request<DeviceStart>("POST", "/v1/auth/device", {
@@ -69,9 +80,13 @@ async function deviceLogin(opts: LoginOpts, ctx: Ctx): Promise<number> {
   });
   ctx.io.stderr(`To sign in, open ${start.verification_uri_complete}`);
   ctx.io.stderr(`and confirm the code ${start.user_code} for this machine (${ctx.hostname}).`);
+  // What we hand to the operating system is built here from the verification
+  // URI's origin and path plus the code, never the server's complete link as
+  // given, so no server-supplied character reaches `open`/`cmd start`.
   let opened = false;
-  if (opts.browser && ctx.isTTY && isOpenableLink(start.verification_uri_complete, pub.apiBase)) {
-    opened = await ctx.openBrowser(start.verification_uri_complete);
+  const target = openTargetFor(start);
+  if (opts.browser && ctx.isTTY && target && isOpenableLink(target, pub.apiBase)) {
+    opened = await ctx.openBrowser(target);
   }
   ctx.io.stderr(opened ? "Opened your browser. Waiting for approval…" : "Waiting for approval…");
 
