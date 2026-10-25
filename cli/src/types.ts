@@ -81,7 +81,7 @@ export type DeckCreateResponse = {
 
 export type FileLink = { url: string; filename: string; expires_at: string };
 
-export type FileResponse = { name: string; text: string; chars?: number; kind?: string };
+export type FileResponse = { name: string; char_count: number; truncated: boolean; text: string };
 
 export type SlideInfo = { num: number; layout: string; headline: string | null; png_url: string };
 
