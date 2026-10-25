@@ -31,7 +31,7 @@ const FIELDS = {
   FileResponse: ["name", "char_count", "truncated", "text"],
   MeResponse: ["email", "plan", "credits", "watermark", "key"],
   DeviceStartResponse: ["device_code", "user_code", "verification_uri", "verification_uri_complete", "expires_in", "interval"],
-  DeviceTokenResponse: ["status", "interval", "api_key", "key_hint", "email"],
+  DeviceTokenResponse: ["status", "interval", "api_key", "key_hint", "key_id", "email"],
   CreditBalance: ["total", "period_remaining", "extra"],
 };
 

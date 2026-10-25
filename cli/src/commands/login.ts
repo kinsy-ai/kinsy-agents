@@ -41,6 +41,27 @@ async function loginWithKey(key: string, opts: LoginOpts, ctx: Ctx): Promise<num
   return finish(key, me, opts, ctx);
 }
 
+// Only links on kinsy.ai (or the configured API host) are handed to the
+// operating system's opener; anything else is printed for the person to
+// judge. The URL comes from the server, and `open`/`xdg-open`/`cmd start`
+// would happily interpret an odd string as flags or a command.
+export function isOpenableLink(url: string, apiBase: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+  const allowed = new Set(["kinsy.ai", "www.kinsy.ai"]);
+  try {
+    allowed.add(new URL(apiBase).host);
+  } catch {
+    /* no api base host to allow */
+  }
+  return allowed.has(parsed.host);
+}
+
 async function deviceLogin(opts: LoginOpts, ctx: Ctx): Promise<number> {
   const pub = publicClient(ctx);
   const start = await pub.request<DeviceStart>("POST", "/v1/auth/device", {
@@ -49,7 +70,9 @@ async function deviceLogin(opts: LoginOpts, ctx: Ctx): Promise<number> {
   ctx.io.stderr(`To sign in, open ${start.verification_uri_complete}`);
   ctx.io.stderr(`and confirm the code ${start.user_code} for this machine (${ctx.hostname}).`);
   let opened = false;
-  if (opts.browser && ctx.isTTY) opened = await ctx.openBrowser(start.verification_uri_complete);
+  if (opts.browser && ctx.isTTY && isOpenableLink(start.verification_uri_complete, pub.apiBase)) {
+    opened = await ctx.openBrowser(start.verification_uri_complete);
+  }
   ctx.io.stderr(opened ? "Opened your browser. Waiting for approval…" : "Waiting for approval…");
 
   let interval = start.interval > 0 ? start.interval : 5;

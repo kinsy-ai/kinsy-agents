@@ -24,7 +24,8 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: npm install -g npm@latest
+      # Trusted publishing needs npm >= 11.5.1; pinned so the publish job never runs a surprise npm.
+      - run: npm install -g npm@11.5.1
       - run: npm ci
       - run: npm run build
       - run: npm test

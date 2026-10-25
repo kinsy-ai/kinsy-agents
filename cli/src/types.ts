@@ -47,6 +47,7 @@ export type DeviceToken = {
   interval: number;
   api_key?: string | null;
   key_hint?: string | null;
+  key_id?: string | null;
   email?: string | null;
 };
 

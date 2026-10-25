@@ -110,6 +110,24 @@ describe("kinsy login", () => {
     expect(expired.err.join("\n")).toMatch(/expired/i);
   });
 
+  it("opens only http(s) links on kinsy.ai or the API host; anything else is printed, never opened", async () => {
+    api = await startFakeApi({
+      "POST /v1/auth/device": (_c, nth) => ({
+        json: { ...START, verification_uri_complete: nth === 1 ? "-a Calculator" : `${api!.url}/cli-auth?code=WXYZ-2345` },
+      }),
+      "POST /v1/auth/device/token": tokenSequence("approved"),
+      "GET /v1/me": () => ({ json: ME }),
+    });
+    const odd = makeCtx(api.url);
+    expect(await runLogin({ browser: true, json: false }, odd)).toBe(EXIT.OK);
+    expect(odd.opened).toEqual([]);
+    expect(odd.err.join("\n")).toContain("-a Calculator");
+
+    const own = makeCtx(api.url);
+    expect(await runLogin({ browser: true, json: false }, own)).toBe(EXIT.OK);
+    expect(own.opened).toEqual([`${api.url}/cli-auth?code=WXYZ-2345`]);
+  });
+
   it("logout removes the file and says how to revoke; a second logout is still exit 0", async () => {
     const ctx = makeCtx("http://127.0.0.1:9");
     fs.mkdirSync(ctx.env.KINSY_CONFIG_DIR!, { recursive: true });
