@@ -445,7 +445,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
 def create_app(api: KinsyApi | None = None):
     """The ASGI app Cloud Run serves: /mcp (Streamable HTTP, stateless, JSON
-    responses), the protected-resource metadata, and /healthz."""
+    responses), the protected-resource metadata, and /health."""
     api = api or KinsyApi(os.environ.get("KINSY_API_BASE", "https://kinsy.ai"))
     server = build_server(api)
     app = server.streamable_http_app(
@@ -462,7 +462,7 @@ def create_app(api: KinsyApi | None = None):
     async def healthz(request: Request) -> JSONResponse:
         return JSONResponse({"ok": True})
 
-    app.router.routes.append(Route("/healthz", healthz, methods=["GET"]))
+    app.router.routes.append(Route("/health", healthz, methods=["GET"]))
     return app
 
 

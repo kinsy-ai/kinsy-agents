@@ -141,7 +141,7 @@ async def test_protected_resource_metadata_names_the_issuer():
     async with app.router.lifespan_context(app):
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://mcp.kinsy.ai") as h:
             prm = (await h.get("/.well-known/oauth-protected-resource/mcp")).json()
-            health = await h.get("/healthz")
+            health = await h.get("/health")
     assert prm["resource"] == "https://mcp.kinsy.ai/mcp"
     assert prm["authorization_servers"] == ["https://kinsy.ai"]
     assert health.status_code == 200 and health.json() == {"ok": True}
