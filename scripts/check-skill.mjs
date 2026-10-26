@@ -101,7 +101,13 @@ if (portable) {
   if (!String(portable.$schema ?? "").startsWith("https://agent-plugins.org/schemas/")) fail("plugin.json $schema is not the agent-plugins schema");
   if (claude && portable.version !== claude.version) fail(`plugin.json version ${portable.version} differs from .claude-plugin/plugin.json ${claude.version}`);
 }
-if (existsSync(path.join(ROOT, ".mcp.json"))) fail(".mcp.json present: the remote server ships in a later release; a dead entry fails every session");
+const mcpJson = readJson(".mcp.json");
+if (mcpJson) {
+  const k = mcpJson.mcpServers?.kinsy;
+  if (!k || k.type !== "http" || k.url !== "https://mcp.kinsy.ai/mcp") fail(".mcp.json must declare kinsy as type http at https://mcp.kinsy.ai/mcp");
+  if (JSON.stringify(mcpJson).match(/ksy_[a-z]+_[A-Za-z0-9]/)) fail(".mcp.json contains a key");
+  if (!String(k?.headers?.Authorization ?? "").includes("${user_config.kinsy_api_key}")) fail(".mcp.json must take the key from userConfig");
+}
 
 if (failures.length) {
   console.error(`check-skill: ${failures.length} problem(s)`);

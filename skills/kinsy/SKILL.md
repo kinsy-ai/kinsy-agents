@@ -19,6 +19,8 @@ Kinsy turns a brief and the user's documents into a native PowerPoint file: real
 
 Do not use it to edit a .pptx the user already has: Kinsy builds new decks and edits its own.
 
+If the Kinsy MCP tools (`create_deck`, `wait_for_deck`, `export_deck`) are connected, use them instead of the CLI: same steps, no install.
+
 ## 1. Check the setup
 
 ```bash
