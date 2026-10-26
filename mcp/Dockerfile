@@ -1,6 +1,6 @@
 # The Kinsy remote MCP server (Cloud Run service kinsy-mcp).
 # A thin client over https://kinsy.ai/v1: no data, no secrets, no Google Cloud roles.
-FROM python:3.13-slim
+FROM python:3.13-slim@sha256:d98cc29d3266e535dd9da1099688d9cb3ca4753813571e071763d17725460962
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -18,4 +18,4 @@ RUN useradd --system --uid 10001 kinsy
 USER kinsy
 
 EXPOSE 8080
-CMD ["sh", "-c", "exec uvicorn kinsy_mcp.server:app --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers --forwarded-allow-ips='*' --no-server-header"]
+CMD ["sh", "-c", "exec uvicorn kinsy_mcp.server:app --host 0.0.0.0 --port ${PORT:-8080} --no-server-header"]

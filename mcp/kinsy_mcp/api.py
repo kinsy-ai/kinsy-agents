@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -98,14 +99,14 @@ class KinsyApi:
 
     async def deck(self, token: str, deck_id: str, include: str = "") -> dict:
         params = {"include": include} if include else None
-        return await self.request("GET", f"/v1/decks/{deck_id}", token, params=params)
+        return await self.request("GET", f"/v1/decks/{quote(deck_id, safe='')}", token, params=params)
 
     async def file_link(self, token: str, deck_id: str, kind: str) -> dict:
-        return await self.request("GET", f"/v1/decks/{deck_id}/files/{kind}", token,
+        return await self.request("GET", f"/v1/decks/{quote(deck_id, safe='')}/files/{quote(kind, safe='')}", token,
                                   params={"redirect": "false"})
 
     async def edit(self, token: str, deck_id: str, slide: int, instruction: str) -> dict:
-        return await self.request("POST", f"/v1/decks/{deck_id}/edits", token,
+        return await self.request("POST", f"/v1/decks/{quote(deck_id, safe='')}/edits", token,
                                   json={"slide": slide, "instruction": instruction},
                                   timeout=EDIT_TIMEOUT)
 

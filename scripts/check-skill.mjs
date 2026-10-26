@@ -19,7 +19,7 @@ const MAX_LINES = 150;
 const PORTABLE_KEYS = new Set(["name", "description", "license", "compatibility", "metadata", "allowed-tools"]);
 // Agents a user brings, plus their own command and directory names
 // (`claude plugin …`, `.claude-plugin/`): product phrases, not the models behind Kinsy.
-const HOST_AGENTS = /\.claude-plugin|\bclaude plugin\b|\bcodex plugin\b|\b(Claude Code|Claude Desktop|Claude\.ai|Codex CLI|Codex|Cursor|GitHub Copilot|Copilot CLI|Copilot|Gemini CLI|Antigravity)\b/g;
+const HOST_AGENTS = /\.claude-plugin|\bclaude (plugin|mcp)\b|\bcodex plugin\b|\b(Claude Code|Claude Desktop|Claude\.ai|Codex CLI|Codex|Cursor|GitHub Copilot|Copilot CLI|Copilot|Gemini CLI|Antigravity)\b/g;
 const VENDOR = /\b(sonnet|haiku|opus|fable|mythos|claude|anthropic|openai|gpt-?\w*|dall-?e|perplexity|libreoffice|gemini)\b/i;
 const CURL_SH = /curl[^\n]*\|\s*(ba|z)?sh\b/i;
 const KEY_SHAPED = /ksy_[a-z]+_[A-Za-z0-9_-]{8,}/;

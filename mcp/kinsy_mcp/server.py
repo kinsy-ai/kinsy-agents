@@ -67,6 +67,10 @@ Rules:
 - Do not use these tools to edit a .pptx the user already has: Kinsy builds new decks and edits its own.
 """
 
+# A deck id is a short token (deck-7f3a1c); anything else could steer the
+# request to another API path, so it is refused before any call.
+DeckId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,80}$", description="The deck_id from create_deck.")]
+
 # Patched by tests.
 _sleep = anyio.sleep
 _now = time.monotonic
@@ -335,7 +339,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
         annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
     )
     async def get_deck(
-        deck_id: Annotated[str, Field(min_length=1, max_length=80)],
+        deck_id: DeckId,
         include_previews: Annotated[bool, Field(description="Add links to images of the first six slides.")] = False,
         include_quality: Annotated[bool, Field(description="Add the claims that could not be matched to the sources.")] = False,
     ) -> Annotated[CallToolResult, DeckState]:
@@ -352,7 +356,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
         annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
     )
     async def wait_for_deck(
-        deck_id: Annotated[str, Field(min_length=1, max_length=80)],
+        deck_id: DeckId,
         ctx: Context,
         timeout_seconds: Annotated[int, Field(ge=5, description=f"How long to wait; capped at {MAX_WAIT_S}.")] = DEFAULT_WAIT_S,
     ) -> Annotated[CallToolResult, DeckState]:
@@ -382,7 +386,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
         annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
     )
     async def export_deck(
-        deck_id: Annotated[str, Field(min_length=1, max_length=80)],
+        deck_id: DeckId,
         format: Annotated[Literal["pptx", "pdf", "png"], Field(description="pptx (editable, default), pdf, or png (a zip of slide images).")] = "pptx",
     ) -> Annotated[CallToolResult, FileOut]:
         """A fresh download link for a finished deck, valid for one hour. Use this when the user wants the file or an earlier link has expired."""
@@ -402,7 +406,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
         annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=False),
     )
     async def edit_slide(
-        deck_id: Annotated[str, Field(min_length=1, max_length=80)],
+        deck_id: DeckId,
         slide: Annotated[int, Field(ge=1, le=51, description="The slide to change, counting from 1.")],
         instruction: Annotated[str, Field(min_length=1, max_length=6000, description="What to change.")],
     ) -> Annotated[CallToolResult, SlideEdited]:

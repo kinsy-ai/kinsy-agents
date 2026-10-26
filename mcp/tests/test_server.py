@@ -343,6 +343,18 @@ async def test_edit_slide_returns_the_new_headline_or_the_question():
     assert "nothing was charged" in text_of(b).lower()
 
 
+@pytest.mark.parametrize("bad", ["../me", "../decks?", "x?include=slides", "a/b", "%2e%2e", "deck 1"])
+async def test_deck_ids_cannot_steer_requests_to_other_paths(bad):
+    fake = FakeApi({})
+    async with Client(build(fake)) as c:
+        outs = [await c.call_tool("get_deck", {"deck_id": bad}),
+                await c.call_tool("edit_slide", {"deck_id": bad, "slide": 1, "instruction": "x"}),
+                await c.call_tool("export_deck", {"deck_id": bad}),
+                await c.call_tool("wait_for_deck", {"deck_id": bad})]
+    assert all(r.is_error for r in outs)
+    assert [r.url.path for r in fake.calls] == []
+
+
 async def test_list_themes():
     fake = FakeApi({"GET /v1/themes": lambda r, n: [
         {"id": "slate", "name": "Slate", "description": "The house theme", "background": "#fff",
