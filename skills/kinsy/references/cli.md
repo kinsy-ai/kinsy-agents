@@ -1,6 +1,6 @@
 # `kinsy` command reference
 
-Install: `npm install -g kinsy` (Node 20 or newer), or run every command through `npx kinsy …`. Full docs: https://kinsy.ai/docs/cli
+Install: `npm install -g kinsy-cli` (Node 20 or newer), or run every command through `npx kinsy-cli …`. Full docs: https://kinsy.ai/docs/cli
 
 ## Signing in
 

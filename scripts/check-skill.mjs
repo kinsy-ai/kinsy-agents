@@ -57,7 +57,7 @@ if (!existsSync(SKILL)) {
     if (!description) fail("frontmatter description missing");
     else if (description.length > 1024) fail(`description is ${description.length} chars; the cap is 1024`);
     const body = text.slice(m[0].length);
-    if (!/kinsy login/.test(body)) fail("SKILL.md never tells the agent how the user signs in (kinsy login)");
+    if (!/kinsy(-cli)? login/.test(body)) fail("SKILL.md never tells the agent how the user signs in (kinsy login)");
     if (!/checkout_url/.test(body)) fail("SKILL.md never says what to do on exit 3 (show checkout_url and stop)");
   }
   const refs = path.join(SKILL_DIR, "references");

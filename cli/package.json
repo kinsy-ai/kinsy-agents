@@ -1,5 +1,5 @@
 {
-  "name": "kinsy",
+  "name": "kinsy-cli",
   "version": "0.1.0",
   "description": "Command-line client for Kinsy: a finished, editable PowerPoint deck from a brief and your documents.",
   "keywords": [

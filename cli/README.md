@@ -3,7 +3,7 @@
 A finished, editable PowerPoint deck from a brief and your documents, from the command line. Thin client over the [Kinsy API](https://kinsy.ai/docs); Node 20 or newer.
 
 ```bash
-npm install -g kinsy        # or run every command through: npx kinsy …
+npm install -g kinsy-cli        # or run every command through: npx kinsy-cli …
 kinsy login                 # once: a code appears here, you confirm it on kinsy.ai
 kinsy create "Q3 board update for a 40-person SaaS company: revenue and churn against plan, the Q4 hiring plan, two asks for the board" \
   --file q3-metrics.csv --slides 10 --out board.pptx

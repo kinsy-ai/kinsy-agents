@@ -30,14 +30,14 @@ then install `kinsy` from `/plugins`.
 **The CLI on its own** (Node 20 or newer):
 
 ```bash
-npx kinsy login
+npx kinsy-cli login
 ```
 
 ## Thirty seconds to a deck
 
 ```bash
-npx kinsy login                      # once: a code appears here, you confirm it on kinsy.ai
-npx kinsy create "Q3 board update for a 40-person SaaS company: revenue and churn against plan, the Q4 hiring plan, two asks for the board" \
+npx kinsy-cli login                      # once: a code appears here, you confirm it on kinsy.ai
+npx kinsy-cli create "Q3 board update for a 40-person SaaS company: revenue and churn against plan, the Q4 hiring plan, two asks for the board" \
   --file q3-metrics.csv --slides 10 --wait --out board.pptx
 ```
 
@@ -48,7 +48,7 @@ npx kinsy create "Q3 board update for a 40-person SaaS company: revenue and chur
 ```
 skills/kinsy/SKILL.md          the skill: when to use Kinsy, how to brief it, how to hand the .pptx back
 skills/kinsy/references/       command reference and the API in one page
-cli/                           the kinsy CLI (TypeScript, published to npm as `kinsy`)
+cli/                           the kinsy CLI (TypeScript, published to npm as `kinsy-cli`; the command it installs is `kinsy`)
 .claude-plugin/                Claude Code plugin + marketplace manifests (the repo root is the plugin)
 .agents/plugins/               Codex marketplace manifest
 plugin.json                    portable Agent Plugins manifest
