@@ -23,7 +23,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "kinsy": "./dist/cli.js"
+    "kinsy": "dist/cli.js"
   },
   "files": [
     "dist",
