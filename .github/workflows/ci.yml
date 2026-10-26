@@ -32,6 +32,22 @@ jobs:
       - run: node dist/cli.js --help
       - run: npm audit --audit-level=high
 
+  mcp:
+    name: MCP server
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install --require-hashes -r requirements.lock
+      - run: pip install pytest==9.0.2
+      - run: python -m pytest -q
+      - run: docker build -t kinsy-mcp:ci .
+
   plugin:
     name: Skill and manifests
     runs-on: ubuntu-latest

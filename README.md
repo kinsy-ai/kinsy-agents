@@ -52,6 +52,7 @@ cli/                           the kinsy CLI (TypeScript, published to npm as `k
 .claude-plugin/                Claude Code plugin + marketplace manifests (the repo root is the plugin)
 .agents/plugins/               Codex marketplace manifest
 plugin.json                    portable Agent Plugins manifest
+mcp/                           the remote MCP server behind https://mcp.kinsy.ai/mcp (Python, official SDK)
 ```
 
 ## How the key is handled

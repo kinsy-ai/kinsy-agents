@@ -1,0 +1,5 @@
+# Direct dependencies of the Kinsy MCP server. requirements.lock is the
+# hash-pinned resolution the image installs (scripts/lock.sh).
+mcp==2.3.0
+httpx>=0.28,<1
+uvicorn[standard]>=0.43,<1

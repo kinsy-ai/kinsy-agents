@@ -6,3 +6,6 @@ cli/dist/
 *.pdf
 .env
 .env.*
+mcp/.venv/
+__pycache__/
+.pytest_cache/
