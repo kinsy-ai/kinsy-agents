@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.kinsy/mcp-server",
+  "title": "Kinsy",
+  "description": "Finished, editable PowerPoint (.pptx) decks from a brief and your documents",
+  "version": "0.1.0",
+  "websiteUrl": "https://kinsy.ai/docs/mcp",
+  "repository": {
+    "url": "https://github.com/kinsy-ai/kinsy-agents",
+    "source": "github",
+    "subfolder": "mcp"
+  },
+  "icons": [
+    { "src": "https://kinsy.ai/icon-512.png", "mimeType": "image/png", "sizes": ["512x512"] }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.kinsy.ai/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "A Kinsy API key from Settings → API keys at kinsy.ai, as \"Bearer ksy_live_…\"",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
