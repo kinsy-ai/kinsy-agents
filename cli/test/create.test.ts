@@ -112,6 +112,19 @@ describe("kinsy create", () => {
     expect(ctx.out.join("\n")).toMatch(/40 credits/);
   });
 
+  it("--out alone implies --wait: it polls and writes the file", async () => {
+    api = await startFakeApi({
+      ...filesRoute(() => api!.url),
+      "POST /v1/decks": () => ({ status: 202, json: CREATED }),
+      "GET /v1/decks/deck-1": statusSequence(),
+    });
+    const out = path.join(tmpdir(), "board.pptx");
+    const ctx = makeCtx(api.url, { KINSY_API_KEY: KEY });
+    expect(await runCreate(base({ out }), ctx)).toBe(EXIT.OK);
+    expect(fs.readFileSync(out)).toEqual(PPTX);
+    expect(api.calls.filter((c) => c.path === "/v1/decks/deck-1")).toHaveLength(3);
+  });
+
   it("--wait polls until done and writes the pptx to --out", async () => {
     api = await startFakeApi({
       ...filesRoute(() => api!.url),

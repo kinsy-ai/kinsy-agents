@@ -31,7 +31,7 @@ kinsy create [brief] [options]
 | `--no-intake` | Skip the clarifying questions Kinsy would otherwise answer for itself. |
 | `-a, --answer <key=value...>` | Answer a clarifying question up front, e.g. `-a audience="the board"`. |
 | `-w, --wait` | Stay until the deck is done (one to two minutes), printing progress on stderr. |
-| `-o, --out <path>` | With `--wait`: save the .pptx here. |
+| `-o, --out <path>` | Save the .pptx here once the deck is done (implies `--wait`). |
 | `--idempotency-key <key>` | Safe retries: the same key within 24 hours returns the first deck and charges nothing. |
 | `--json` | One JSON object on stdout; everything else on stderr. |
 

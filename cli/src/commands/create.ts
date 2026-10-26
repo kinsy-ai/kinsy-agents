@@ -88,7 +88,9 @@ export async function runCreate(opts: CreateOpts, ctx: Ctx): Promise<number> {
     const id = created.deck_id;
     const web = webUrl(id);
 
-    if (!opts.wait) {
+    // Asking for the file is asking to wait for it.
+    const wait = opts.wait || Boolean(opts.out);
+    if (!wait) {
       if (opts.json) {
         printJson({ ...created, web_url: web }, ctx.io);
       } else {

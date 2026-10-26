@@ -26,7 +26,7 @@ npx kinsy me
 ```
 
 - Exit 0: signed in; the output shows the plan and the credit balance.
-- Exit 2: not signed in. Ask the user to run `npx kinsy login` in their terminal: it opens kinsy.ai, they confirm a short code, and the terminal is connected. If you cannot hand them a terminal, run `npx kinsy login --no-browser` and show the user the printed link and code. Never ask the user for their key and never paste a key anywhere.
+- Exit 2: not signed in. Ask the user to run `npx kinsy login` in their own terminal: it opens kinsy.ai, they confirm a short code, and that terminal is connected. If you must start it yourself, run `npx kinsy login --no-browser` in the background (it waits up to ten minutes for the approval, longer than most command timeouts), show the user the printed link and code straight away, and tell them it finishes on its own once they confirm. Never ask the user for their key and never paste a key anywhere.
 - `npx` missing: `npm install -g kinsy` (Node 20 or newer).
 
 ## 2. Make the deck

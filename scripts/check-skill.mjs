@@ -64,7 +64,7 @@ if (!existsSync(SKILL)) {
   if (existsSync(refs)) for (const f of readdirSync(refs)) if (f.endsWith(".md")) scanCopy(path.join(refs, f));
 }
 
-for (const f of ["README.md", "SECURITY.md"]) {
+for (const f of ["README.md", "SECURITY.md", "cli/README.md"]) {
   const p = path.join(ROOT, f);
   if (existsSync(p)) scanCopy(p);
   else fail(`${f} missing`);

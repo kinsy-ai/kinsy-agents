@@ -100,7 +100,7 @@ Examples:
     .option("--no-intake", "skip the clarifying questions Kinsy would otherwise answer for itself")
     .option("-a, --answer <key=value...>", "answer a clarifying question up front, e.g. audience=\"the board\"")
     .option("-w, --wait", "stay until the deck is done (one to two minutes)")
-    .option("-o, --out <path>", "with --wait: save the .pptx here")
+    .option("-o, --out <path>", "save the .pptx here once the deck is done (implies --wait)")
     .option("--idempotency-key <key>", "safe retries: the same key within 24 h returns the first deck, charging nothing")
     .option("--json", "machine-readable output: one JSON object on stdout")
     .addHelpText(

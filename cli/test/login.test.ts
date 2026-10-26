@@ -137,6 +137,34 @@ describe("kinsy login", () => {
     expect(smuggle.opened).toEqual(["https://kinsy.ai/cli-auth?code=WXYZ-2345"]);
   });
 
+  it("a 429 during the poll waits retry_after and carries on", async () => {
+    api = await startFakeApi({
+      "POST /v1/auth/device": () => ({ json: START }),
+      "POST /v1/auth/device/token": (_c, nth) =>
+        nth === 1
+          ? { status: 429, json: envelope(429, "rate_limited", "slow down", { retry_after: 7 }) }
+          : { json: { status: "approved", interval: 5, api_key: KEY, key_hint: "…wxyz", email: "dev@example.com" } },
+      "GET /v1/me": () => ({ json: ME }),
+    });
+    const ctx = makeCtx(api.url);
+    expect(await runLogin({ browser: false, json: false }, ctx)).toBe(EXIT.OK);
+    expect(ctx.sleeps).toEqual([7000]);
+    expect(loadCredentials(ctx.env).apiKey).toBe(KEY);
+  });
+
+  it("saves the key before the greeting call, so a failing /v1/me never loses a minted key", async () => {
+    api = await startFakeApi({
+      "POST /v1/auth/device": () => ({ json: START }),
+      "POST /v1/auth/device/token": tokenSequence("approved"),
+      "GET /v1/me": () => ({ status: 503, json: envelope(503, "unavailable", "try later") }),
+    });
+    const ctx = makeCtx(api.url);
+    expect(await runLogin({ browser: false, json: false }, ctx)).toBe(EXIT.OK);
+    expect(loadCredentials(ctx.env).apiKey).toBe(KEY);
+    expect(ctx.all()).toMatch(/Signed in/);
+    expect(ctx.all()).not.toContain(KEY);
+  });
+
   it("logout removes the file and says how to revoke; a second logout is still exit 0", async () => {
     const ctx = makeCtx("http://127.0.0.1:9");
     fs.mkdirSync(ctx.env.KINSY_CONFIG_DIR!, { recursive: true });

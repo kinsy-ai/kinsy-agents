@@ -2,7 +2,7 @@
 
 A finished, editable PowerPoint deck from a brief and your documents, callable from any agent or terminal. This repository holds the `kinsy` command-line client, the `kinsy` Agent Skill, and the plugin manifests that let one install line work in Claude Code, Codex and any agent that reads [Agent Skills](https://agentskills.io).
 
-Kinsy's output is a native .pptx: real text boxes, tables and charts, embedded fonts, a slide master. It opens in PowerPoint as designed, imports cleanly into Google Slides, and numbers the sources do not support are flagged. A finished deck takes one to two minutes.
+Kinsy's output is a native .pptx: real text boxes, tables and charts, embedded fonts, a slide master. It opens in PowerPoint as designed and in Google Slides, and numbers the sources do not support are flagged. A finished deck takes one to two minutes.
 
 ## Install
 

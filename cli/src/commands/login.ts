@@ -9,22 +9,31 @@ export type LoginOpts = { key?: string; browser: boolean; json: boolean };
 
 export const WEB_URL = "https://kinsy.ai";
 
-async function finish(key: string, me: Me, opts: LoginOpts, ctx: Ctx): Promise<number> {
-  const file = saveCredentials({ apiKey: key, email: me.email ?? undefined, keyHint: maskKey(key) }, ctx.env);
+// Save first, greet second: a key that was minted for us must never be lost
+// because the greeting call (GET /v1/me) happened to fail.
+async function finish(key: string, email: string | null | undefined, opts: LoginOpts, ctx: Ctx): Promise<number> {
+  const file = saveCredentials({ apiKey: key, email: email ?? undefined, keyHint: maskKey(key) }, ctx.env);
+  let me: Me | null = null;
+  try {
+    me = await clientFor(ctx, key).request<Me>("GET", "/v1/me");
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    ctx.io.stderr(`Signed in, but the account details could not be fetched just now (${reason}).`);
+  }
   if (opts.json) {
     printJson(
       {
         ok: true,
-        email: me.email,
-        plan: me.plan,
-        credits: me.credits?.total ?? null,
+        email: me?.email ?? email ?? null,
+        plan: me?.plan ?? null,
+        credits: me?.credits?.total ?? null,
         key_hint: maskKey(key),
         credentials: file,
       },
       ctx.io,
     );
   } else {
-    ctx.io.stdout(`Signed in as ${me.email ?? "your Kinsy account"} (key ${maskKey(key)}).`);
+    ctx.io.stdout(`Signed in as ${me?.email ?? email ?? "your Kinsy account"} (key ${maskKey(key)}).`);
     ctx.io.stdout(`Credentials saved to ${file} (readable by you only).`);
   }
   return EXIT.OK;
@@ -37,8 +46,9 @@ async function loginWithKey(key: string, opts: LoginOpts, ctx: Ctx): Promise<num
       code: "unauthorized",
     });
   }
+  // A pasted key is checked before it is stored: a refused key saves nothing.
   const me = await clientFor(ctx, key).request<Me>("GET", "/v1/me");
-  return finish(key, me, opts, ctx);
+  return finish(key, me.email, opts, ctx);
 }
 
 // Only links on kinsy.ai (or the configured API host) are handed to the
@@ -92,16 +102,28 @@ async function deviceLogin(opts: LoginOpts, ctx: Ctx): Promise<number> {
 
   let interval = start.interval > 0 ? start.interval : 5;
   const maxPolls = Math.ceil((start.expires_in > 0 ? start.expires_in : 600) / Math.max(1, interval)) + 10;
-  for (let n = 0; n < maxPolls; n++) {
-    if (n > 0) await ctx.sleep(interval * 1000);
-    const res = await pub.request<DeviceToken>("POST", "/v1/auth/device/token", {
-      json: { device_code: start.device_code },
-    });
+  for (let polls = 0; polls < maxPolls; polls++) {
+    let res: DeviceToken;
+    try {
+      res = await pub.request<DeviceToken>("POST", "/v1/auth/device/token", {
+        json: { device_code: start.device_code },
+      });
+    } catch (err) {
+      // Several terminals behind one address can trip the per-address
+      // damper; the approval may land while we wait, so wait rather than give up.
+      if (err instanceof KinsyError && err.status === 429) {
+        await ctx.sleep((err.retryAfter ?? interval + 5) * 1000);
+        continue;
+      }
+      throw err;
+    }
     switch (res.status) {
       case "pending":
+        await ctx.sleep(interval * 1000);
         continue;
       case "slow_down":
         interval = res.interval > interval ? res.interval : interval + 5;
+        await ctx.sleep(interval * 1000);
         continue;
       case "approved": {
         if (!res.api_key) {
@@ -110,8 +132,7 @@ async function deviceLogin(opts: LoginOpts, ctx: Ctx): Promise<number> {
             code: "bad_response",
           });
         }
-        const me = await clientFor(ctx, res.api_key).request<Me>("GET", "/v1/me");
-        return finish(res.api_key, me, opts, ctx);
+        return finish(res.api_key, res.email, opts, ctx);
       }
       case "denied":
         throw new KinsyError("Sign-in was denied in the browser. Nothing was connected.", {
