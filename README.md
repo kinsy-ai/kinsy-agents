@@ -73,6 +73,10 @@ The same credits everywhere: no API plan, no surcharge. New accounts start with 
 
 A remote connector for hosted assistants is in progress; this repository will carry its manifest when it ships.
 
+## Privacy, terms and support
+
+Briefs and documents you pass to the CLI go to your own Kinsy account at kinsy.ai and nowhere else; the decks it makes stay there until you delete them. [Privacy](https://kinsy.ai/privacy) · [Terms](https://kinsy.ai/terms) · [Support](https://kinsy.ai/contact) (support@kinsy.ai).
+
 ## Security
 
 See [SECURITY.md](SECURITY.md). Releases of the CLI are published from GitHub Actions with provenance; nothing here asks you to pipe a script into a shell.
