@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kinsy",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit) plus the kinsy skill for the CLI.",
   "author": {
     "name": "Kinsy",

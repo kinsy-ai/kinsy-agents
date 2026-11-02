@@ -135,6 +135,24 @@ async def test_verifier_caches_a_good_key_for_a_minute():
     assert await v.verify_token("ksy_live_" + "z" * 43) is None
 
 
+def _oauth_me(resource: str):
+    def me(req, n):
+        return {**ME, "key": {**ME["key"], "kind": "oauth_access", "resource": resource}}
+    return me
+
+
+async def test_verifier_accepts_a_sign_in_token_issued_for_this_server():
+    fake = FakeApi({"GET /v1/me": _oauth_me("https://mcp.kinsy.ai/mcp")})
+    v = srv.KinsyTokenVerifier(KinsyApi("https://api.test", transport=fake.transport))
+    assert (await v.verify_token("ksy_oat_" + "a" * 43)) is not None
+
+
+async def test_verifier_refuses_a_sign_in_token_issued_for_another_server():
+    fake = FakeApi({"GET /v1/me": _oauth_me("https://elsewhere.example/mcp")})
+    v = srv.KinsyTokenVerifier(KinsyApi("https://api.test", transport=fake.transport))
+    assert (await v.verify_token("ksy_oat_" + "a" * 43)) is None
+
+
 async def test_protected_resource_metadata_names_the_issuer():
     api = KinsyApi("https://api.test", transport=FakeApi({}).transport)
     app = srv.create_app(api)

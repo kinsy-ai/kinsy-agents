@@ -19,6 +19,8 @@ claude plugin marketplace add kinsy-ai/kinsy-agents
 claude plugin install kinsy@kinsy-ai
 ```
 
+The plugin also connects Kinsy's remote MCP server; the first time a tool runs, Claude Code opens kinsy.ai to sign in.
+
 **Codex:**
 
 ```bash
@@ -72,7 +74,7 @@ The same credits everywhere: no API plan, no surcharge. New accounts start with 
 - [CLI reference](https://kinsy.ai/docs/cli)
 - [API reference](https://kinsy.ai/docs/api) and [OpenAPI document](https://kinsy.ai/v1/openapi.json)
 
-A remote connector for hosted assistants is in progress; this repository will carry its manifest when it ships.
+**Hosted assistants** (any MCP client that can sign in): add `https://mcp.kinsy.ai/mcp` as a remote server and sign in to Kinsy when asked; you approve the connection once on kinsy.ai and can disconnect it in Settings → Connected apps. The Claude Code plugin above connects the same way. [Setup per client](https://kinsy.ai/docs/mcp).
 
 ## Privacy, terms and support
 

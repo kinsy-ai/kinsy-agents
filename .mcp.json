@@ -2,10 +2,7 @@
   "mcpServers": {
     "kinsy": {
       "type": "http",
-      "url": "https://mcp.kinsy.ai/mcp",
-      "headers": {
-        "Authorization": "Bearer ${user_config.kinsy_api_key}"
-      }
+      "url": "https://mcp.kinsy.ai/mcp"
     }
   }
 }

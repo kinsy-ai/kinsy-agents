@@ -1,6 +1,6 @@
 {
   "name": "kinsy",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit) plus the kinsy skill for the CLI.",
   "author": {
     "name": "Kinsy",
@@ -17,14 +17,5 @@
     "deck",
     "skills",
     "cli"
-  ],
-  "userConfig": {
-    "kinsy_api_key": {
-      "type": "string",
-      "title": "Kinsy API key",
-      "description": "Create one in Settings → API keys at kinsy.ai (starts with ksy_live_).",
-      "required": true,
-      "sensitive": true
-    }
-  }
+  ]
 }
