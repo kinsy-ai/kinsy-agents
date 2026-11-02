@@ -401,3 +401,11 @@ async def test_no_result_ever_contains_the_key():
     for r in outs:
         blob = text_of(r) + json.dumps(r.structured_content or {})
         assert GOOD not in blob and "ksy_live_" not in blob
+
+
+async def test_verifier_refuses_a_sign_in_token_whose_audience_it_cannot_see():
+    def me(req, n):
+        return {**ME, "key": None}
+    fake = FakeApi({"GET /v1/me": me})
+    v = srv.KinsyTokenVerifier(KinsyApi("https://api.test", transport=fake.transport))
+    assert (await v.verify_token("ksy_oat_" + "a" * 43)) is None

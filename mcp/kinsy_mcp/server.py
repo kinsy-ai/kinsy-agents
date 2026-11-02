@@ -186,7 +186,8 @@ class KinsyTokenVerifier:
         key = me.get("key") or {}
         # A token an assistant got by signing in names the server it was
         # issued for; one issued for another server is not ours to accept.
-        if key.get("kind") == "oauth_access" and key.get("resource") != RESOURCE:
+        signed_in = token.startswith("ksy_oat_") or key.get("kind") == "oauth_access"
+        if signed_in and key.get("resource") != RESOURCE:
             logger.warning("mcp.verify_wrong_audience resource=%s", str(key.get("resource"))[:100])
             return None
         access = AccessToken(token=token, client_id=str(key.get("key_id") or "kinsy"),
