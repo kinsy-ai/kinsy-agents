@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { runEdit } from "../src/commands/edit.js";
-import { defaultOutPath, runGet } from "../src/commands/get.js";
+import { defaultOutPath, runGet, runGetSlides } from "../src/commands/get.js";
 import { runStatus } from "../src/commands/status.js";
 import { EXIT } from "../src/exit.js";
 import { envelope, startFakeApi, type FakeApi } from "./fake_server.js";
@@ -83,6 +83,32 @@ describe("kinsy status / get / edit", () => {
     const ctx = makeCtx(api.url, { KINSY_API_KEY: KEY });
     expect(await runGet({ deckId: "deck-1", kind: "pptx", out, json: true }, ctx)).toBe(EXIT.OK);
     expect(JSON.parse(ctx.out[0])).toEqual({ deck_id: "deck-1", kind: "pptx", path: out, filename: "board-update.pptx", bytes: PDF.length });
+  });
+
+  it("get --slides asks the server to deliver to Google Slides and prints the link", async () => {
+    const link = "https://docs.google.com/presentation/d/1AbC_dEf-2345678/edit";
+    api = await startFakeApi({
+      "POST /v1/decks/deck-1/deliver": () => ({
+        json: { to: "google_slides", url: link, file_id: "1AbC_dEf-2345678", title: "Board update" },
+      }),
+    });
+    const ctx = makeCtx(api.url, { KINSY_API_KEY: KEY });
+    expect(await runGetSlides({ deckId: "deck-1", json: false }, ctx)).toBe(EXIT.OK);
+    expect(api.calls[0].json).toEqual({ to: "google_slides" });
+    expect(ctx.out.join("\n")).toContain(link);
+  });
+
+  it("get --slides without Drive connected is exit 4 and says where to connect", async () => {
+    api = await startFakeApi({
+      "POST /v1/decks/deck-1/deliver": () => ({
+        status: 409,
+        json: envelope(409, "google_not_connected",
+          "connect Google Drive once at https://kinsy.ai/settings#google, then ask again"),
+      }),
+    });
+    const ctx = makeCtx(api.url, { KINSY_API_KEY: KEY });
+    expect(await runGetSlides({ deckId: "deck-1", json: false }, ctx)).toBe(EXIT.INPUT);
+    expect(ctx.err.join("\n")).toContain("https://kinsy.ai/settings#google");
   });
 
   it("defaultOutPath prefers the server's filename and falls back to the id", () => {

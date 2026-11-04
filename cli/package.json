@@ -1,6 +1,6 @@
 {
   "name": "kinsy-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Command-line client for Kinsy: a finished, editable PowerPoint deck from a brief and your documents.",
   "keywords": [
     "pptx",

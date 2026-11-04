@@ -105,6 +105,10 @@ class KinsyApi:
         return await self.request("GET", f"/v1/decks/{quote(deck_id, safe='')}/files/{quote(kind, safe='')}", token,
                                   params={"redirect": "false"})
 
+    async def deliver(self, token: str, deck_id: str, to: str = "google_slides") -> dict:
+        return await self.request("POST", f"/v1/decks/{quote(deck_id, safe='')}/deliver", token,
+                                  json={"to": to})
+
     async def edit(self, token: str, deck_id: str, slide: int, instruction: str) -> dict:
         return await self.request("POST", f"/v1/decks/{quote(deck_id, safe='')}/edits", token,
                                   json={"slide": slide, "instruction": instruction},

@@ -17,7 +17,8 @@ from tests.fake_api import DONE, GOOD, ME, OTHER, FakeApi, envelope, status
 pytestmark = pytest.mark.anyio
 
 ACCEPT = {"Accept": "application/json, text/event-stream", "Content-Type": "application/json"}
-TOOLS = {"create_deck", "get_deck", "wait_for_deck", "export_deck", "edit_slide", "list_themes"}
+TOOLS = {"create_deck", "get_deck", "wait_for_deck", "export_deck", "edit_slide", "list_themes",
+         "send_to_google_slides"}
 
 
 @pytest.fixture
@@ -174,13 +175,17 @@ async def test_every_tool_has_a_title_annotations_and_a_use_when_description():
     assert set(tools) == TOOLS
     for name, t in tools.items():
         assert t.title, name
-        assert t.annotations is not None and t.annotations.open_world_hint is False, name
+        assert t.annotations is not None, name
+        # Only the Drive tool reaches beyond Kinsy (the user's Google Drive).
+        assert t.annotations.open_world_hint is (name == "send_to_google_slides"), name
         assert t.description and "Use this" in t.description, name
     for name in ("get_deck", "wait_for_deck", "export_deck", "list_themes"):
         assert tools[name].annotations.read_only_hint is True, name
     assert tools["edit_slide"].annotations.destructive_hint is True
     assert tools["create_deck"].annotations.destructive_hint is False
     assert tools["create_deck"].annotations.read_only_hint is False
+    assert tools["send_to_google_slides"].annotations.read_only_hint is False
+    assert tools["send_to_google_slides"].annotations.destructive_hint is False
 
 
 async def test_instructions_lead_with_the_task_and_stay_short():
@@ -409,3 +414,31 @@ async def test_verifier_refuses_a_sign_in_token_whose_audience_it_cannot_see():
     fake = FakeApi({"GET /v1/me": me})
     v = srv.KinsyTokenVerifier(KinsyApi("https://api.test", transport=fake.transport))
     assert (await v.verify_token("ksy_oat_" + "a" * 43)) is None
+
+
+# ---------------------------------------------------------------------------
+# send_to_google_slides
+# ---------------------------------------------------------------------------
+async def test_send_to_google_slides_posts_deliver_and_returns_the_link():
+    out = {"to": "google_slides", "url": "https://docs.google.com/presentation/d/1AbC_dEf-2345678/edit",
+           "file_id": "1AbC_dEf-2345678", "title": "Board update"}
+    fake = FakeApi({"POST /v1/decks/deck-1/deliver": lambda r, n: out})
+    async with Client(build(fake)) as c:
+        r = await c.call_tool("send_to_google_slides", {"deck_id": "deck-1"})
+    req = [x for x in fake.calls if x.url.path.endswith("/deliver")][0]
+    assert json.loads(req.content) == {"to": "google_slides"}
+    assert not r.is_error
+    assert r.structured_content == {"deck_id": "deck-1", "url": out["url"],
+                                    "file_id": out["file_id"], "title": "Board update"}
+    assert out["url"] in text_of(r)
+
+
+async def test_send_to_google_slides_not_connected_passes_on_where_to_connect():
+    msg = "connect Google Drive once at https://kinsy.ai/settings#google, then ask again"
+    fake = FakeApi({"POST /v1/decks/deck-1/deliver": lambda r, n: httpx.Response(
+        409, json=envelope(409, "google_not_connected", msg, connect_url="https://kinsy.ai/settings#google"))})
+    async with Client(build(fake)) as c:
+        r = await c.call_tool("send_to_google_slides", {"deck_id": "deck-1"})
+    assert r.is_error
+    assert "https://kinsy.ai/settings#google" in text_of(r)
+    assert r.structured_content["error"]["code"] == "google_not_connected"

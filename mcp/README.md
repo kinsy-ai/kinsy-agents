@@ -12,6 +12,7 @@ It is a thin client over the public [Kinsy API](https://kinsy.ai/docs): every ca
 | `wait_for_deck` | Waits for a deck to finish (up to 540 s), streaming progress, then returns its links. | No |
 | `get_deck` | Status and links; optionally slide image links and the claims the sources could not back. | No |
 | `export_deck` | A fresh one-hour download link for the .pptx, PDF, or a zip of slide images. | No |
+| `send_to_google_slides` | Saves a finished deck as a Google Slides file in the user's own Drive (connect Drive once in Settings on kinsy.ai). | Adds a file to their Drive |
 | `edit_slide` | Rewrites one slide from an instruction. | Spends credits |
 | `list_themes` | The theme ids `create_deck` accepts. | No |
 

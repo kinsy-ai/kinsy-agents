@@ -1,6 +1,6 @@
 {
   "name": "kinsy",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit) plus the kinsy skill for the CLI.",
   "author": {
     "name": "Kinsy",

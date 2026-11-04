@@ -4,7 +4,7 @@
 import { Command, InvalidArgumentError, Option } from "commander";
 import { runCreate } from "./commands/create.js";
 import { runEdit } from "./commands/edit.js";
-import { runGet } from "./commands/get.js";
+import { runGet, runGetSlides } from "./commands/get.js";
 import { runStatus } from "./commands/status.js";
 import { runLogin } from "./commands/login.js";
 import { runLogout } from "./commands/logout.js";
@@ -156,15 +156,20 @@ Nothing is charged when there are not enough credits (exit 3; the top-up link is
 
   program
     .command("get")
-    .description("Download a finished deck: the .pptx (default), the PDF, or a zip of slide images.")
+    .description("Download a finished deck: the .pptx (default), the PDF, or a zip of slide images; or put it in Google Slides.")
     .argument("<deck_id>")
     .option("--pptx", "the editable PowerPoint file (default)")
     .option("--pdf", "the PDF")
     .option("--png", "a zip of one image per slide")
+    .option("--slides", "save it to your Google Drive as Google Slides and print the link (connect Drive once at kinsy.ai/settings)")
     .option("-o, --out <path>", "where to save it (default: the deck's own filename in the current directory)")
     .option("--json", "machine-readable output")
-    .addHelpText("after", "\nExamples:\n  kinsy get deck-7f3a1c --out board.pptx\n  kinsy get deck-7f3a1c --pdf")
-    .action(async (deckId: string, opts: { pptx?: boolean; pdf?: boolean; png?: boolean; out?: string; json?: boolean }) => {
+    .addHelpText("after", "\nExamples:\n  kinsy get deck-7f3a1c --out board.pptx\n  kinsy get deck-7f3a1c --pdf\n  kinsy get deck-7f3a1c --slides")
+    .action(async (deckId: string, opts: { pptx?: boolean; pdf?: boolean; png?: boolean; slides?: boolean; out?: string; json?: boolean }) => {
+      if (opts.slides) {
+        done(await runGetSlides({ deckId, json: Boolean(opts.json) }, ctx));
+        return;
+      }
       const kind = opts.pdf ? "pdf" : opts.png ? "png" : "pptx";
       done(await runGet({ deckId, kind, out: opts.out, json: Boolean(opts.json) }, ctx));
     });

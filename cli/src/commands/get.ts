@@ -20,3 +20,24 @@ export async function runGet(opts: GetOpts, ctx: Ctx): Promise<number> {
     return printError(err, opts, ctx.io);
   }
 }
+
+export type SlidesOpts = { deckId: string; json: boolean };
+type Delivery = { to: string; url: string; file_id: string; title: string };
+
+// --slides: the server saves the deck to the user's connected Google Drive
+// as Google Slides and answers with the link; nothing is downloaded here.
+export async function runGetSlides(opts: SlidesOpts, ctx: Ctx): Promise<number> {
+  try {
+    const res = await requireClient(ctx).request<Delivery>(
+      "POST", `/v1/decks/${encodeURIComponent(opts.deckId)}/deliver`, { json: { to: "google_slides" } },
+    );
+    if (opts.json) {
+      printJson({ deck_id: opts.deckId, ...res }, ctx.io);
+    } else {
+      ctx.io.stdout(`Saved to Google Slides: ${res.url}`);
+    }
+    return EXIT.OK;
+  } catch (err) {
+    return printError(err, opts, ctx.io);
+  }
+}

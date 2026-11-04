@@ -43,6 +43,7 @@ npx kinsy-cli create "<brief>" --file notes.md --file data.csv --slides 10 --wai
 - `--json` prints one object: `deck_id`, `status`, `slides_total`, `credits_charged`, `pptx_path`, `web_url`. Progress goes to stderr.
 - Kinsy answers its own clarifying questions. To decide one yourself add `--answer audience="the board"`; `--no-intake` skips the questions.
 - Retrying after a timeout? Add `--idempotency-key <the same value>` so the same deck comes back and nothing is charged twice.
+- Want it in Google Slides? `npx kinsy-cli get <deck_id> --slides` saves it to the user's own Google Drive and prints the link. If Drive is not connected, show the user the link in the error (Settings on kinsy.ai) and stop.
 
 ## Write a good brief
 
