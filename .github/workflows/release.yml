@@ -24,8 +24,10 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      # Trusted publishing needs npm >= 11.5.1; pinned so the publish job never runs a surprise npm.
-      - run: npm install -g npm@11.5.1
+      # Trusted publishing (OIDC) needs a current npm: the registry's token
+      # exchange moved on after 11.5.1 and that pin failed with E404 on PUT
+      # (7 Nov 2026). Pinned to the major so the job never runs a surprise npm.
+      - run: npm install -g npm@12
       - run: npm ci
       - run: npm run build
       - run: npm test
