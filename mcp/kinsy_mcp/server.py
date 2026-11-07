@@ -269,8 +269,11 @@ def _state(d: dict, *, previews: bool = False, quality: bool = False) -> DeckSta
 
 def _state_sentence(s: DeckState) -> str:
     if s.status == "done":
+        # Decks built before the API kept counts report none: say nothing
+        # about the count rather than "0 slides".
         n = s.slides_total or s.slides_rendered
-        line = (f"Deck {s.deck_id} is ready: {n} slides. Download the .pptx: {s.pptx_url} "
+        ready = f"ready: {n} slides" if n else "ready"
+        line = (f"Deck {s.deck_id} is {ready}. Download the .pptx: {s.pptx_url} "
                 f"(link valid for one hour). Review and edit: {s.web_url}")
         if s.quality is not None:
             k = s.quality.flagged

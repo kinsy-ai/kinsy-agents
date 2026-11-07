@@ -247,6 +247,17 @@ async def test_create_deck_needs_a_brief_or_a_source():
 # ---------------------------------------------------------------------------
 # get_deck / wait_for_deck
 # ---------------------------------------------------------------------------
+async def test_get_deck_done_without_counts_does_not_say_zero_slides():
+    # Decks built before the API kept counts: done, slides_rendered 0, slides_total null.
+    fake = FakeApi({"GET /v1/decks/deck-old": lambda r, n: {**DONE, "deck_id": "deck-old",
+                                                             "slides_rendered": 0, "slides_total": None}})
+    async with Client(build(fake)) as c:
+        r = await c.call_tool("get_deck", {"deck_id": "deck-old"})
+    text = r.content[0].text
+    assert "0 slides" not in text and "Deck deck-old is ready" in text
+    assert r.structured_content["slides_total"] is None
+
+
 async def test_get_deck_done_gives_links_previews_and_quality_when_asked():
     slides = [{"num": i, "layout": "bullets", "headline": f"H{i}", "png_url": f"https://storage.example/s{i}.png"}
               for i in range(1, 9)]
