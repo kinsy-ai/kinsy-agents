@@ -34,6 +34,20 @@ describe("kinsy status / get / edit", () => {
     expect(text).toContain("40%");
   });
 
+  it("status on a finished deck with no slide counts does not print 0/?", async () => {
+    // Decks built before the progress sink carry no counts: the API sends
+    // slides_rendered 0 and slides_total null for a done deck.
+    api = await startFakeApi({ "GET /v1/decks/deck-old": () => ({ json: {
+      deck_id: "deck-old", status: "done", phase: "done", progress: 1, slides_rendered: 0, slides_total: null,
+      title: "Old deck",
+    } }) });
+    const ctx = makeCtx(api.url, { KINSY_API_KEY: KEY });
+    expect(await runStatus({ deckId: "deck-old", watch: false, json: false }, ctx)).toBe(EXIT.OK);
+    const text = ctx.out.join("\n");
+    expect(text).not.toContain("0/?");
+    expect(text).toContain("100% · Old deck");
+  });
+
   it("status --json prints the status object; --watch follows until done", async () => {
     api = await startFakeApi({
       "GET /v1/decks/deck-1": (_c, nth) =>

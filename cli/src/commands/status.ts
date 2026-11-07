@@ -15,9 +15,12 @@ export type StatusOpts = {
 
 export function describeStatus(s: DeckStatus): string[] {
   const pct = Math.round((s.progress ?? 0) * 100);
+  // A deck built before the API kept counts reports none: say nothing
+  // about slides rather than "0/?".
+  const counts = s.slides_total == null && !s.slides_rendered ? "" : `${s.slides_rendered}/${s.slides_total ?? "?"} slides · `;
   const lines = [
     `${s.deck_id}: ${s.status}${s.phase && s.phase !== s.status ? ` (${s.phase})` : ""}`,
-    `${s.slides_rendered}/${s.slides_total ?? "?"} slides · ${pct}%${s.title ? ` · ${s.title}` : ""}`,
+    `${counts}${pct}%${s.title ? ` · ${s.title}` : ""}`,
   ];
   if (s.status === "done") {
     lines.push(`Download:  kinsy get ${s.deck_id} --out deck.pptx`);
