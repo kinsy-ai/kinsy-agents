@@ -315,7 +315,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="Create a PowerPoint deck",
-        annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False),
+        annotations=ToolAnnotations(title="Create a PowerPoint deck", readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False),
     )
     async def create_deck(
         brief: Annotated[str, Field(max_length=50_000, description="Who the deck is for, what it must achieve, the points it must make, the tone.")] = "",
@@ -353,7 +353,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="Check a deck",
-        annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
+        annotations=ToolAnnotations(title="Check a deck", readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
     )
     async def get_deck(
         deck_id: DeckId,
@@ -370,7 +370,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="Wait for a deck",
-        annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
+        annotations=ToolAnnotations(title="Wait for a deck", readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
     )
     async def wait_for_deck(
         deck_id: DeckId,
@@ -400,7 +400,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="Download a deck",
-        annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
+        annotations=ToolAnnotations(title="Download a deck", readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
     )
     async def export_deck(
         deck_id: DeckId,
@@ -420,7 +420,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="Put a deck in Google Slides",
-        annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True),
+        annotations=ToolAnnotations(title="Put a deck in Google Slides", readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True),
     )
     async def send_to_google_slides(deck_id: DeckId) -> Annotated[CallToolResult, SlidesOut]:
         """Save a finished deck as a new Google Slides file in the user's own Google Drive and return its link. Use this only when the user asks for the deck in Google Slides or Google Drive. Free. If Drive is not connected yet, pass on the link the error gives so the user can connect it once."""
@@ -435,7 +435,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="Change one slide",
-        annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=False),
+        annotations=ToolAnnotations(title="Change one slide", readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=False),
     )
     async def edit_slide(
         deck_id: DeckId,
@@ -460,7 +460,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="List deck themes",
-        annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
+        annotations=ToolAnnotations(title="List deck themes", readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False),
     )
     async def list_themes() -> Annotated[CallToolResult, Themes]:
         """The visual themes create_deck accepts. Use this when the user asks for a particular look; otherwise let Kinsy choose."""
