@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kinsy",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit) plus the kinsy skill for the CLI.",
   "author": {
     "name": "Kinsy",
@@ -30,7 +30,7 @@
         "websiteURL": "https://kinsy.ai",
         "privacyPolicyURL": "https://kinsy.ai/privacy",
         "termsOfServiceURL": "https://kinsy.ai/terms",
-        "logo": "./assets/logo.png",
+        "logo": "./logo.png",
         "brandColor": "#c7a14a"
       }
     }

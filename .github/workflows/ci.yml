@@ -57,7 +57,8 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/check-skill.mjs
-      - run: npx -y @anthropic-ai/claude-code plugin validate . --profile directory
+      - run: npx -y @anthropic-ai/claude-code plugin validate plugins/kinsy --profile directory
+      - run: npx -y @anthropic-ai/claude-code plugin validate .
 
   secrets:
     name: Secret scan

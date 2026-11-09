@@ -1,0 +1,27 @@
+{
+  "name": "kinsy",
+  "displayName": "Kinsy",
+  "version": "0.4.1",
+  "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit, send to Google Slides) plus the kinsy skill.",
+  "author": {
+    "name": "Kinsy",
+    "url": "https://kinsy.ai"
+  },
+  "homepage": "https://kinsy.ai/docs/agents",
+  "repository": "https://github.com/kinsy-ai/kinsy-agents",
+  "license": "MIT",
+  "keywords": [
+    "pptx",
+    "powerpoint",
+    "slides",
+    "presentation",
+    "deck",
+    "skills",
+    "cli"
+  ],
+  "icon": "./logo.png",
+  "documentationUrl": "https://kinsy.ai/docs/agents",
+  "supportUrl": "https://kinsy.ai/contact",
+  "privacyPolicyUrl": "https://kinsy.ai/privacy",
+  "termsOfServiceUrl": "https://kinsy.ai/terms"
+}

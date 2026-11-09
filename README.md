@@ -48,12 +48,15 @@ npx kinsy-cli create "Q3 board update for a 40-person SaaS company: revenue and 
 ## What is here
 
 ```
-skills/kinsy/SKILL.md          the skill: when to use Kinsy, how to brief it, how to hand the .pptx back
-skills/kinsy/references/       command reference and the API in one page
+plugins/kinsy/                 the plugin: text and images only, so plugin directories can scan it
+  skills/kinsy/SKILL.md        the skill: when to use Kinsy, how to brief it, how to hand the .pptx back
+  skills/kinsy/references/     command reference and the API in one page
+  .claude-plugin/plugin.json   Claude Code plugin manifest
+  plugin.json                  portable Agent Plugins manifest (Codex reads this one)
+  .mcp.json                    connects Kinsy's remote MCP server
+.claude-plugin/marketplace.json  Claude Code marketplace (points at plugins/kinsy)
+.agents/plugins/marketplace.json Codex marketplace (same)
 cli/                           the kinsy CLI (TypeScript, published to npm as `kinsy-cli`; the command it installs is `kinsy`)
-.claude-plugin/                Claude Code plugin + marketplace manifests (the repo root is the plugin)
-.agents/plugins/               Codex marketplace manifest
-plugin.json                    portable Agent Plugins manifest
 mcp/                           the remote MCP server behind https://mcp.kinsy.ai/mcp (Python, official SDK)
 ```
 

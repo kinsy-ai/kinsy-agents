@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "kinsy",
-      "source": ".",
+      "source": "./plugins/kinsy",
       "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit) plus the kinsy skill for the CLI.",
       "category": "productivity",
       "tags": [
