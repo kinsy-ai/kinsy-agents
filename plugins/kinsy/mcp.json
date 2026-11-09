@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "kinsy": {
+      "type": "streamable-http",
+      "url": "https://mcp.kinsy.ai/mcp",
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "oauth",
+            "client": {
+              "mode": "cimd"
+            },
+            "defaultScopes": [
+              "decks",
+              "offline_access"
+            ],
+            "resource": "https://mcp.kinsy.ai/mcp"
+          }
+        }
+      }
+    }
+  }
+}
