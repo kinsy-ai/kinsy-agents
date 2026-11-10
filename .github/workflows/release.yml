@@ -20,13 +20,14 @@ jobs:
         working-directory: cli
     steps:
       - uses: actions/checkout@v4
+      # No `registry-url` here on purpose: setup-node would write an
+      # `_authToken=${NODE_AUTH_TOKEN}` line into .npmrc, and npm then sends
+      # that placeholder token instead of exchanging the GitHub OIDC token
+      # (E404, then "OIDC permission denied", 7-10 Nov 2026). With no token
+      # configured, npm 11.5.1+ uses trusted publishing on its own.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
-      # Trusted publishing (OIDC) needs a current npm: the registry's token
-      # exchange moved on after 11.5.1 and that pin failed with E404 on PUT
-      # (7 Nov 2026). Pinned to the major so the job never runs a surprise npm.
       - run: npm install -g npm@12
       - run: npm ci
       - run: npm run build
