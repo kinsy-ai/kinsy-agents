@@ -453,3 +453,21 @@ async def test_send_to_google_slides_not_connected_passes_on_where_to_connect():
     assert r.is_error
     assert "https://kinsy.ai/settings#google" in text_of(r)
     assert r.structured_content["error"]["code"] == "google_not_connected"
+
+
+
+async def test_openai_apps_challenge_serves_the_token_only_when_set(monkeypatch):
+    """The directory's domain check reads the token as plain text from the
+    origin root; without a token the path is a 404, not an empty 200."""
+    api = KinsyApi("https://api.test", transport=FakeApi({}).transport)
+    monkeypatch.delenv("KINSY_OPENAI_APPS_CHALLENGE", raising=False)
+    app = srv.create_app(api)
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://mcp.kinsy.ai") as h:
+            assert (await h.get("/.well-known/openai-apps-challenge")).status_code == 404
+    monkeypatch.setenv("KINSY_OPENAI_APPS_CHALLENGE", "tok_123")
+    app = srv.create_app(api)
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://mcp.kinsy.ai") as h:
+            r = await h.get("/.well-known/openai-apps-challenge")
+    assert r.status_code == 200 and r.text == "tok_123" and r.headers["content-type"].startswith("text/plain")

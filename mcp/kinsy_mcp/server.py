@@ -20,7 +20,7 @@ from typing import Annotated, Any, Callable, Literal
 import anyio
 from pydantic import BaseModel, Field
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.routing import Route
 
 from mcp.server.auth.middleware.auth_context import get_access_token
@@ -495,6 +495,18 @@ def create_app(api: KinsyApi | None = None):
         return JSONResponse({"ok": True})
 
     app.router.routes.append(Route("/health", healthz, methods=["GET"]))
+
+    # OpenAI's plugin directory proves we own this hostname by fetching a
+    # token it issued from the origin root. Plain text, no JSON; absent
+    # until the operator sets it, so a stray deploy never claims a domain.
+    challenge = os.environ.get("KINSY_OPENAI_APPS_CHALLENGE", "").strip()
+
+    async def openai_apps_challenge(request: Request) -> PlainTextResponse:
+        if not challenge:
+            return PlainTextResponse("", status_code=404)
+        return PlainTextResponse(challenge)
+
+    app.router.routes.append(Route("/.well-known/openai-apps-challenge", openai_apps_challenge, methods=["GET"]))
     return app
 
 
