@@ -315,7 +315,9 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
 
     @server.tool(
         title="Create a PowerPoint deck",
-        annotations=ToolAnnotations(title="Create a PowerPoint deck", readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False),
+        # openWorldHint is true: a build may research on the web (research="auto"),
+        # which OpenAI's tool scan counts as reaching an external system (10 Nov 2026).
+        annotations=ToolAnnotations(title="Create a PowerPoint deck", readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True),
     )
     async def create_deck(
         brief: Annotated[str, Field(max_length=50_000, description="Who the deck is for, what it must achieve, the points it must make, the tone.")] = "",

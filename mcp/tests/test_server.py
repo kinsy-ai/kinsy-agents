@@ -177,7 +177,8 @@ async def test_every_tool_has_a_title_annotations_and_a_use_when_description():
         assert t.title, name
         assert t.annotations is not None, name
         # Only the Drive tool reaches beyond Kinsy (the user's Google Drive).
-        assert t.annotations.open_world_hint is (name == "send_to_google_slides"), name
+        # create_deck may research on the web; send_to_google_slides writes to Drive.
+        assert t.annotations.open_world_hint is (name in ("send_to_google_slides", "create_deck")), name
         assert t.description and "Use this" in t.description, name
     for name in ("get_deck", "wait_for_deck", "export_deck", "list_themes"):
         assert tools[name].annotations.read_only_hint is True, name
