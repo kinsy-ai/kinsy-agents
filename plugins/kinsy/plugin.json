@@ -44,43 +44,31 @@
             {
               "description": "Build a deck from a pasted brief",
               "prompt": "Make a 10-slide deck on the history of chocolate for a general audience: origins, the industrial era, today's market, and two surprising facts.",
-              "tools_triggered": [
-                "create_deck",
-                "wait_for_deck"
-              ],
+              "tools_triggered": "create_deck, wait_for_deck",
               "expected_behavior": "create_deck returns a deck_id at once; wait_for_deck reports progress and then the .pptx download link and the kinsy.ai review link."
             },
             {
               "description": "Build a deck from attached source material",
               "prompt": "Here are our Q3 metrics (pasted CSV). Make a board update: revenue and churn against plan, the Q4 hiring plan, and two asks for the board.",
-              "tools_triggered": [
-                "create_deck",
-                "wait_for_deck"
-              ],
+              "tools_triggered": "create_deck, wait_for_deck",
               "expected_behavior": "The pasted data is passed as a source; the finished deck uses only figures the source supports and flags any it cannot."
             },
             {
               "description": "Check on a deck without waiting",
               "prompt": "What is the status of deck deck-70a130?",
-              "tools_triggered": [
-                "get_deck"
-              ],
+              "tools_triggered": "get_deck",
               "expected_behavior": "get_deck reports the status (building or done) and, when done, a download link and the review link."
             },
             {
               "description": "Change one slide",
               "prompt": "On slide 3 of that deck, tighten the headline and cut the bullets to three.",
-              "tools_triggered": [
-                "edit_slide"
-              ],
+              "tools_triggered": "edit_slide",
               "expected_behavior": "edit_slide rewrites slide 3 and returns the updated deck links; nothing else on the deck changes."
             },
             {
               "description": "List the visual themes",
               "prompt": "Which looks can Kinsy give the deck?",
-              "tools_triggered": [
-                "list_themes"
-              ],
+              "tools_triggered": "list_themes",
               "expected_behavior": "list_themes returns the theme names and a one-line description of each."
             }
           ],
