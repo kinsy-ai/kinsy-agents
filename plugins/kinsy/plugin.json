@@ -23,11 +23,12 @@
     "com.openai": {
       "interface": {
         "displayName": "Kinsy",
-        "shortDescription": "Finished, editable PowerPoint decks from a brief and your documents.",
+        "shortDescription": "Finished PowerPoint decks",
         "longDescription": "Kinsy turns a brief and your source documents into a native PowerPoint file: real text boxes, tables and charts, embedded fonts and a slide master, with unsupported numbers flagged. Ask for a deck and paste or attach your notes, report or data; Kinsy returns a download link and a web link to review and edit every slide. A finished deck takes one to two minutes. Change one slide with a single instruction, pick a visual theme, or save the deck to Google Slides in your own Drive. For coding agents, the kinsy skill teaches the same job through the Kinsy CLI. Limitations: Kinsy builds new decks and edits its own; it does not edit a .pptx you already have. Decks are stored in your Kinsy account until you delete them.",
         "developerName": "Kinsy",
         "category": "Productivity",
         "websiteURL": "https://kinsy.ai",
+        "supportURL": "https://kinsy.ai/contact",
         "privacyPolicyURL": "https://kinsy.ai/privacy",
         "termsOfServiceURL": "https://kinsy.ai/terms",
         "logo": "./logo.png",
