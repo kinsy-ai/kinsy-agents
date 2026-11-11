@@ -77,46 +77,6 @@
             "default": null,
             "description": "A theme id from list_themes.",
             "title": "Theme"
-          },
-          "research": {
-            "default": "auto",
-            "description": "Look things up on the web while planning.",
-            "enum": [
-              "auto",
-              "on",
-              "off"
-            ],
-            "title": "Research",
-            "type": "string"
-          },
-          "answers": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "default": {},
-            "description": "Answers to Kinsy's clarifying questions, e.g. {\"audience\": \"the board\"}.",
-            "title": "Answers",
-            "type": "object"
-          },
-          "skip_questions": {
-            "default": false,
-            "description": "Build straight from the brief without clarifying questions.",
-            "title": "Skip Questions",
-            "type": "boolean"
-          },
-          "idempotency_key": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Reuse the same value when retrying, so a retry returns the first deck and charges nothing.",
-            "title": "Idempotency Key"
           }
         },
         "title": "create_deckArguments"
@@ -137,18 +97,6 @@
             "pattern": "^[A-Za-z0-9_-]{1,80}$",
             "title": "Deck Id",
             "type": "string"
-          },
-          "include_previews": {
-            "default": false,
-            "description": "Add links to images of the first six slides.",
-            "title": "Include Previews",
-            "type": "boolean"
-          },
-          "include_quality": {
-            "default": false,
-            "description": "Add the claims that could not be matched to the sources.",
-            "title": "Include Quality",
-            "type": "boolean"
           }
         },
         "required": [

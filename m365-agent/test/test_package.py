@@ -186,7 +186,20 @@ def test_build_fills_the_registration_id_and_zips_six_files(tmp_path):
     assert "${{" not in json.dumps(built)
 
 
-@pytest.mark.parametrize("bad", ["", "short", "has spaces in it", "${{KINSY_OAUTH_REFERENCE_ID}}"])
+def test_pinned_tools_hide_the_arguments_a_chat_should_not_set():
+    by_name = {t["name"]: t["inputSchema"]["properties"] for t in tools["tools"]}
+    assert set(by_name["create_deck"]) == {"brief", "sources", "slides", "theme"}
+    assert set(by_name["get_deck"]) == {"deck_id"}
+
+
+def test_every_starter_works_in_a_new_chat():
+    # No starter may depend on a deck from an earlier conversation: there is no list tool.
+    for s in agent["conversation_starters"]:
+        assert not re.search(r"\b(my|last|the) deck\b", s["text"], re.I), s["text"]
+
+
+@pytest.mark.parametrize("bad", ["", "short", "has spaces in it", "${{KINSY_OAUTH_REFERENCE_ID}}",
+                                 "kcs_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", "kc_abcdefghijklmnop"])
 def test_build_refuses_a_missing_or_malformed_registration_id(tmp_path, bad):
     with pytest.raises(SystemExit):
         _build_module().build(bad, tmp_path / "agent.zip")

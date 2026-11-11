@@ -24,6 +24,13 @@ from mcp import Client  # noqa: E402
 from kinsy_mcp.server import build_server  # noqa: E402
 
 PINNED = ["create_deck", "get_deck", "export_deck", "list_themes"]
+# Arguments left out of the pinned definitions (all optional on the server).
+# idempotency_key: a model that reused one value would get the first deck back
+# for a different request. The others steer the build in ways a chat should not.
+HIDDEN = {
+    "create_deck": {"idempotency_key", "skip_questions", "answers", "research"},
+    "get_deck": {"include_previews", "include_quality"},
+}
 OUT = ROOT / "m365-agent" / "appPackage" / "mcp-tools.json"
 
 # Wording for Copilot, where a build is started and checked on later.
@@ -51,11 +58,14 @@ async def tools() -> list[dict]:
     out = []
     for name in PINNED:
         t = listed[name].model_dump(mode="json", by_alias=True, exclude_none=True)
+        schema = t["inputSchema"]
+        for arg in HIDDEN.get(name, ()):
+            schema["properties"].pop(arg)
         entry = {
             "name": t["name"],
             "title": t.get("title") or t["name"],
             "description": DESCRIPTIONS.get(name, t["description"]),
-            "inputSchema": t["inputSchema"],
+            "inputSchema": schema,
             "annotations": {"readOnlyHint": bool(t.get("annotations", {}).get("readOnlyHint"))},
         }
         out.append(entry)

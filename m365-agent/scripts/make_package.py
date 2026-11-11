@@ -58,9 +58,8 @@ agent = {
     "conversation_starters": [
         {"title": "Build a deck", "text": "Build a ten-slide deck for our board on third-quarter results: revenue, hiring, the two biggest risks and what we need from them."},
         {"title": "Turn notes into slides", "text": "I will paste my meeting notes. Turn them into a short deck for the leadership team."},
-        {"title": "Is my deck ready?", "text": "Is my deck ready? Give me the link to download it."},
+        {"title": "Explain a topic", "text": "Build a five-slide introduction to the water cycle for a class of ten-year-olds."},
         {"title": "Choose a look", "text": "What themes can a Kinsy deck use?"},
-        {"title": "Get the file again", "text": "Give me a fresh download link for the last deck you built."},
     ],
     "actions": [{"id": "kinsyMcp", "file": "ai-plugin.json"}],
 }

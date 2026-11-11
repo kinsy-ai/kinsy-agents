@@ -19,7 +19,10 @@ PLACEHOLDER = "${{KINSY_OAUTH_REFERENCE_ID}}"
 
 
 def build(reference_id: str, out: pathlib.Path) -> pathlib.Path:
-    if not re.fullmatch(r"[A-Za-z0-9+/=_-]{8,200}", reference_id or ""):
+    # A registration id, never a credential: refuse anything shaped like a
+    # Kinsy client id, client secret or token pasted here by mistake.
+    if (not re.fullmatch(r"[A-Za-z0-9+/=_-]{8,200}", reference_id or "")
+            or re.match(r"(kc_|kcs_|ksy_|whsec_)", reference_id)):
         raise SystemExit("KINSY_OAUTH_REFERENCE_ID is missing or is not a registration id")
     out.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:

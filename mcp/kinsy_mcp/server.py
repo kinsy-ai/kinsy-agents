@@ -278,7 +278,7 @@ def _state_sentence(s: DeckState) -> str:
         if s.quality is not None:
             k = s.quality.flagged
             line += (f" {k} claim{'s' if k != 1 else ''} could not be backed by the sources provided "
-                     "(flagged_claims lists them); mention this to the user and offer edit_slide." if k else
+                     "(flagged_claims lists them); mention this to the user and offer to change those slides (edit_slide, or the review link)." if k else
                      " Every checked claim is backed by the sources.")
         return line
     pct = round(s.progress * 100)
@@ -350,7 +350,7 @@ def build_server(api: KinsyApi, *, token_provider: Callable[[], str | None] | No
                           web_url=_web(created["deck_id"]))
         return CallToolResult(
             content=_text(f"Deck {out.deck_id} started ({out.credits_charged} credits). It usually finishes "
-                          "in one to two minutes: call wait_for_deck with this deck_id."),
+                          "in one to two minutes: wait for it with wait_for_deck, or check on it with get_deck, using this deck_id."),
             structured_content=out.model_dump(mode="json"))
 
     @server.tool(
