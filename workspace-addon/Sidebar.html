@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_blank">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+      html, body { margin: 0; padding: 0; }
+      body { box-sizing: border-box; max-width: 300px; padding: 12px 12px 44px; overflow-x: hidden; }
+      [hidden] { display: none !important; }
+      h1 { font-size: 16px; font-weight: 500; line-height: 1.35; margin: 4px 0 8px; overflow-wrap: anywhere; }
+      p { margin: 0 0 12px; line-height: 1.45; overflow-wrap: anywhere; }
+      label { display: block; margin: 0 0 4px; }
+      textarea, select { box-sizing: border-box; width: 100%; margin: 0 0 12px; }
+      textarea { min-height: 132px; resize: vertical; font-family: inherit; }
+      .check { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 12px; }
+      .check input { margin: 2px 0 0; flex: none; }
+      .check span { overflow-wrap: anywhere; min-width: 0; }
+      .wide { display: block; box-sizing: border-box; width: 100%; margin: 0 0 8px; text-align: center; }
+      a.button { text-decoration: none; height: auto; line-height: 27px; }
+      .links { margin-top: 8px; }
+      .links a, .links button.plain { display: block; margin: 0 0 8px; }
+      button.plain { background: none; border: 0; padding: 0; color: #1a73e8; cursor: pointer; font: inherit; text-align: left; }
+      button.plain:hover { text-decoration: underline; }
+      .small { font-size: 11px; }
+      .note { border-left: 3px solid #dadce0; padding: 2px 0 2px 8px; }
+      .bar { height: 4px; border-radius: 2px; background: #e8eaed; overflow: hidden; margin: 0 0 8px; }
+      .bar span { display: block; height: 100%; background: #1a73e8; transition: width .4s; }
+      .foot { position: fixed; left: 0; right: 0; bottom: 0; padding: 8px 12px; background: #fff; border-top: 1px solid #e8eaed;
+              display: flex; justify-content: space-between; align-items: center; }
+    </style>
+  </head>
+  <body>
+    <section id="v-loading"><p class="gray">Loading…</p></section>
+
+    <section id="v-signed-out" hidden>
+      <h1>Finished decks from a brief</h1>
+      <p class="gray">Describe the deck and Kinsy builds editable slides in your Drive. Numbers your sources don't support are flagged.</p>
+      <p id="signin-note" class="note" role="status" hidden></p>
+      <a id="signin" class="button action wide" href="#" rel="noopener">Sign in to Kinsy</a>
+      <p id="signin-wait" class="gray small" role="status" hidden>Waiting for you to finish signing in…</p>
+      <p class="gray small">New to Kinsy? You can create a free account in the sign-in tab. Builds use credits from your Kinsy account, sold by Kinsy.</p>
+    </section>
+
+    <section id="v-form" hidden>
+      <p id="form-note" class="note" role="status" hidden></p>
+      <label for="brief">What should the deck say, and who is it for?</label>
+      <textarea id="brief" maxlength="50000" placeholder="A ten-minute update for the board on Q3: revenue, hiring, the two risks and what we need from them."></textarea>
+      <label id="doc-row" class="check" hidden>
+        <input id="use-doc" type="checkbox" checked>
+        <span>Build from this document: <b id="doc-name"></b></span>
+      </label>
+      <label for="slides">Slides</label>
+      <select id="slides">
+        <option>5</option><option>6</option><option>8</option><option selected>10</option>
+        <option>12</option><option>15</option><option>20</option><option>25</option>
+      </select>
+      <button id="build" class="action wide" type="button">Build deck</button>
+      <p class="gray small">Uses credits from your Kinsy account.</p>
+    </section>
+
+    <section id="v-building" hidden aria-live="polite">
+      <h1>Building your deck…</h1>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="bar" style="width:4%"></span></div>
+      <p id="progress" class="gray">Planning the deck…</p>
+      <p class="gray small">This usually takes one to two minutes. Keep this panel open; you can carry on working.</p>
+    </section>
+
+    <section id="v-done" hidden>
+      <h1 id="done-title">Your deck is ready</h1>
+      <p id="done-note" class="gray" role="status">Saved to your Google Drive as a Slides file.</p>
+      <a id="open-slides" class="button action wide" href="#" rel="noopener">Open in Google Slides</a>
+      <button id="save-again" class="action wide" type="button" hidden>Save to Google Slides</button>
+      <div class="links">
+        <a id="done-kinsy" href="#" rel="noopener">Open in Kinsy</a>
+        <button id="another" class="plain" type="button">Build another deck</button>
+      </div>
+    </section>
+
+    <section id="v-error" hidden>
+      <h1 id="error-title">That didn't work</h1>
+      <p id="error-message" class="note" role="alert"></p>
+      <a id="buy" class="button action wide" href="#" rel="noopener" hidden>Buy credits on kinsy.ai</a>
+      <button id="retry" class="wide" type="button">Try again</button>
+      <div class="links"><a id="error-kinsy" href="#" rel="noopener" hidden>Open in Kinsy</a></div>
+    </section>
+
+    <div class="foot gray small">
+      <span>© Kinsy</span>
+      <button id="signout" class="plain small" type="button" hidden>Sign out</button>
+    </div>
+
+    <script>
+      (function () {
+        var ORIGIN = 'https://kinsy.ai';
+        var POLL_MS = 3000, SIGNIN_POLL_MS = 2500, SIGNIN_LINK_MS = 9 * 60 * 1000;
+        var MAX_BUILD_MS = 15 * 60 * 1000, MAX_POLL_FAILS = 5;
+        var VIEWS = ['loading', 'signed-out', 'form', 'building', 'done', 'error'];
+        var SIGNIN_WAIT_MS = 10 * 60 * 1000;
+        var state = { host: 'slides', pricingUrl: ORIGIN + '/pricing', signInTimer: null, linkTimer: null, run: 0, creating: false, key: '' };
+        var $ = function (id) { return document.getElementById(id); };
+
+        // One call to the script. Always resolves to {ok, ...}.
+        function call(name) {
+          var args = Array.prototype.slice.call(arguments, 1);
+          return new Promise(function (resolve) {
+            var runner = google.script.run
+              .withSuccessHandler(function (out) { resolve(out && typeof out === 'object' ? out : { ok: false, kind: 'server', message: 'Something went wrong. Try again.' }); })
+              .withFailureHandler(function (err) {
+                // The reason goes to the console for support; people see a plain sentence.
+                try { console.error('kinsy.run_failed', name, err && err.message ? err.message : String(err)); } catch (e) {}
+                resolve({ ok: false, kind: 'server', retry: 'load', message: 'Google could not run the add-on. Try again.' });
+              });
+            runner[name].apply(runner, args);
+          });
+        }
+
+        function show(name) {
+          VIEWS.forEach(function (v) { $('v-' + v).hidden = v !== name; });
+          $('signout').hidden = name === 'signed-out' || name === 'loading';
+          if (name !== 'signed-out') stopSignInWatch();
+        }
+        function note(id, text) {
+          $(id).textContent = text || '';
+          $(id).hidden = !text;
+        }
+        function deckUrl(deckId) { return ORIGIN + '/deck/' + encodeURIComponent(deckId); }
+        function safeUrl(url, prefix) { return typeof url === 'string' && url.indexOf(prefix) === 0 ? url : '#'; }
+
+        // ---- sign-in ----
+        function stopSignInWatch() {
+          clearInterval(state.signInTimer); state.signInTimer = null;
+          clearTimeout(state.linkTimer); state.linkTimer = null;
+          $('signin-wait').hidden = true;
+        }
+        function signedOut(message, signInUrl) {
+          note('signin-note', message);
+          $('signin').href = safeUrl(signInUrl, ORIGIN + '/oauth/authorize?');
+          show('signed-out');
+          // The link is good for ten minutes; fetch a new one before then,
+          // unless a sign-in is under way (its own deadline renews it).
+          clearTimeout(state.linkTimer);
+          state.linkTimer = setTimeout(function () { if (!state.signInTimer) load(message); }, SIGNIN_LINK_MS);
+        }
+        function load(message) {
+          return call('getState').then(function (s) {
+            if (!s.ok) return fail(s);
+            state.host = s.host;
+            state.pricingUrl = safeUrl(s.pricingUrl, ORIGIN + '/');
+            if (!s.signedIn) return signedOut(message, s.signInUrl);
+            $('doc-row').hidden = s.host !== 'docs';
+            $('doc-name').textContent = s.documentName || 'this document';
+            note('form-note', '');
+            show('form');
+            syncBuild();
+          });
+        }
+        $('signin').addEventListener('click', function (ev) {
+          if ($('signin').getAttribute('href') === '#') { ev.preventDefault(); return; }
+          if (state.signInTimer) return;
+          note('signin-note', '');
+          $('signin-wait').hidden = false;
+          var deadline = Date.now() + SIGNIN_WAIT_MS;
+          state.signInTimer = setInterval(function () {
+            if (Date.now() > deadline) {
+              stopSignInWatch();
+              load("Sign-in didn't finish. Select Sign in to try again.");
+              return;
+            }
+            call('checkSignIn').then(function (s) {
+              if (s.ok && s.signedIn && state.signInTimer) load();
+            });
+          }, SIGNIN_POLL_MS);
+        });
+        $('signout').addEventListener('click', function () {
+          state.run += 1;
+          $('signout').disabled = true;
+          call('signOut').then(function () { $('signout').disabled = false; load(); });
+        });
+
+        // ---- form ----
+        function usesDocument() { return state.host === 'docs' && $('use-doc').checked; }
+        function syncBuild() { $('build').disabled = state.creating || (!$('brief').value.trim() && !usesDocument()); }
+        // A changed form is a new submission; an unchanged one, sent again
+        // after a failure, reuses its key so it cannot be charged twice.
+        function changed() { state.key = ''; syncBuild(); }
+        function newKey() {
+          var a = new Uint8Array(16), s = '';
+          (window.crypto || window.msCrypto).getRandomValues(a);
+          for (var i = 0; i < a.length; i++) s += ('0' + a[i].toString(16)).slice(-2);
+          return s;
+        }
+        $('brief').addEventListener('input', changed);
+        $('use-doc').addEventListener('change', changed);
+        $('slides').addEventListener('change', changed);
+
+        // ---- build ----
+        function progress(d) {
+          var total = d && d.slidesTotal, done = (d && d.slidesRendered) || 0;
+          var pct = total ? Math.min(100, Math.round(done / total * 100)) : Math.round(((d && d.progress) || 0) * 100);
+          $('bar').style.width = Math.max(pct, 4) + '%';
+          $('bar').parentNode.setAttribute('aria-valuenow', String(pct));
+          $('progress').textContent = done > 0 && total ? done + ' of ' + total + ' slides ready' : 'Planning the deck…';
+        }
+        function fail(out, deckId) {
+          if (out.kind === 'auth') return load(out.message);
+          var credits = out.kind === 'credits';
+          $('error-title').textContent = credits ? "You're out of credits" : "That didn't work";
+          $('error-message').textContent = credits
+            ? 'This deck needs more credits than your account has. Nothing was charged.'
+            : (out.message || 'Something went wrong. Try again.');
+          $('buy').hidden = !credits;
+          $('buy').href = state.pricingUrl;
+          $('retry').className = credits ? 'wide' : 'action wide';
+          $('error-kinsy').hidden = !deckId;
+          $('error-kinsy').href = deckId ? deckUrl(deckId) : '#';
+          state.retryLoad = out.retry === 'load' && !deckId;
+          show('error');
+        }
+        function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+        function build() {
+          if (state.creating) return;
+          var run = ++state.run;
+          state.creating = true;
+          if (!state.key) state.key = newKey();
+          syncBuild();
+          var req = { brief: $('brief').value, slides: Number($('slides').value), useDocument: usesDocument(), key: state.key };
+          call('startBuild', req).then(function (out) {
+            state.creating = false;
+            syncBuild();
+            if (run !== state.run) return;
+            if (!out.ok) return fail(out);
+            state.key = '';
+            progress(null);
+            show('building');
+            return watch(out.deckId, run, Date.now(), 0);
+          });
+        }
+        function watch(deckId, run, started, fails) {
+          if (run !== state.run) return;
+          if (Date.now() - started > MAX_BUILD_MS) {
+            return fail({ message: 'This is taking longer than expected. Open it in Kinsy to check on it.' }, deckId);
+          }
+          return call('pollDeck', deckId).then(function (d) {
+            if (run !== state.run) return;
+            if (!d.ok) {
+              // A blip should not lose a build that is still running.
+              if ((d.kind === 'server' || d.kind === 'busy') && fails + 1 < MAX_POLL_FAILS) {
+                return wait(POLL_MS).then(function () { return watch(deckId, run, started, fails + 1); });
+              }
+              return fail(d, deckId);
+            }
+            if (d.status === 'done') return save(deckId, run, d.title);
+            if (d.status === 'error' || d.status === 'stalled') {
+              return fail({ message: d.error || 'The build stopped before it finished.' }, deckId);
+            }
+            progress(d);
+            return wait(POLL_MS).then(function () { return watch(deckId, run, started, 0); });
+          });
+        }
+        function save(deckId, run, title) {
+          $('bar').style.width = '100%';
+          $('progress').textContent = 'Saving to Google Slides…';
+          show('building');
+          $('save-again').disabled = true;
+          return call('saveDeck', deckId).then(function (out) {
+            if (run !== state.run) return;
+            $('save-again').disabled = false;
+            if (!out.ok && out.kind === 'auth') return load(out.message);
+            $('done-title').textContent = (out.ok && out.title) || title || 'Your deck is ready';
+            $('done-kinsy').href = deckUrl(deckId);
+            $('open-slides').hidden = !out.ok;
+            $('save-again').hidden = out.ok;
+            if (out.ok) {
+              $('open-slides').href = safeUrl(out.url, 'https://docs.google.com/presentation/d/');
+              $('done-note').textContent = 'Saved to your Google Drive as a Slides file.';
+            } else {
+              $('done-note').textContent = (out.message || "It couldn't be saved to Google Slides.") + ' The deck is safe in Kinsy.';
+              $('save-again').onclick = function () { save(deckId, run, title); };
+            }
+            show('done');
+          });
+        }
+        $('build').addEventListener('click', build);
+        function backToForm() { state.run += 1; note('form-note', ''); show('form'); syncBuild(); }
+        $('another').addEventListener('click', backToForm);
+        // A failure before the panel knew who is signed in starts it again;
+        // any other failure goes back to the filled-in form.
+        $('retry').addEventListener('click', function () {
+          if (state.retryLoad) { state.run += 1; show('loading'); load(); } else { backToForm(); }
+        });
+
+        load();
+      })();
+    </script>
+  </body>
+</html>
