@@ -106,7 +106,11 @@
           return new Promise(function (resolve) {
             var runner = google.script.run
               .withSuccessHandler(function (out) { resolve(out && typeof out === 'object' ? out : { ok: false, kind: 'server', message: 'Something went wrong. Try again.' }); })
-              .withFailureHandler(function () { resolve({ ok: false, kind: 'server', message: 'Google could not run the add-on. Try again.' }); });
+              .withFailureHandler(function (err) {
+                // The reason goes to the console for support; people see a plain sentence.
+                try { console.error('kinsy.run_failed', name, err && err.message ? err.message : String(err)); } catch (e) {}
+                resolve({ ok: false, kind: 'server', retry: 'load', message: 'Google could not run the add-on. Try again.' });
+              });
             runner[name].apply(runner, args);
           });
         }
@@ -210,6 +214,7 @@
           $('retry').className = credits ? 'wide' : 'action wide';
           $('error-kinsy').hidden = !deckId;
           $('error-kinsy').href = deckId ? deckUrl(deckId) : '#';
+          state.retryLoad = out.retry === 'load' && !deckId;
           show('error');
         }
         function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
@@ -280,7 +285,11 @@
         $('build').addEventListener('click', build);
         function backToForm() { state.run += 1; note('form-note', ''); show('form'); syncBuild(); }
         $('another').addEventListener('click', backToForm);
-        $('retry').addEventListener('click', backToForm);
+        // A failure before the panel knew who is signed in starts it again;
+        // any other failure goes back to the filled-in form.
+        $('retry').addEventListener('click', function () {
+          if (state.retryLoad) { state.run += 1; show('loading'); load(); } else { backToForm(); }
+        });
 
         load();
       })();

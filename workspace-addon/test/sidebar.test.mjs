@@ -245,6 +245,16 @@ describe("build", () => {
     expect($("open-slides").getAttribute("href")).toBe("#");
   });
 
+  it("starts again from the beginning when the first call fails", async () => {
+    let n = 0;
+    const t = await mount({ getState: () => { n += 1; if (n === 1) throw new Error("PERMISSION_DENIED"); return { ok: true, signedIn: true, host: "slides", documentName: "" }; } });
+    expect(visible()).toEqual(["error"]);
+    $("retry").click();
+    await tick();
+    expect(t.named("getState")).toHaveLength(2);
+    expect(visible()).toEqual(["form"]);
+  });
+
   it("survives Google failing to run the script", async () => {
     await mount({ startBuild: () => { throw new Error("ScriptError"); } });
     type("Board update");
