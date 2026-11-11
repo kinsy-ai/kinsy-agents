@@ -1,0 +1,14 @@
+{
+  "name": "kinsy-workspace-addon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kinsy for Google Slides and Docs: an Apps Script Editor add-on",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5"
+  }
+}
