@@ -9,3 +9,4 @@ cli/dist/
 mcp/.venv/
 __pycache__/
 .pytest_cache/
+m365-agent/dist/
