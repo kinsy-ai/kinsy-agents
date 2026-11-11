@@ -1,0 +1,57 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.4/schema.json",
+  "schema_version": "v2.4",
+  "name_for_human": "Kinsy",
+  "description_for_human": "Finished, editable PowerPoint decks from a brief and your documents.",
+  "description_for_model": "Builds finished, editable PowerPoint decks on the person's Kinsy account from a brief and source text, reports on a deck's progress, and gives links to download or review a finished deck. Use for requests to make a presentation, deck or slides.",
+  "contact_email": "support@kinsy.ai",
+  "namespace": "kinsy",
+  "privacy_policy_url": "https://kinsy.ai/privacy",
+  "legal_info_url": "https://kinsy.ai/terms",
+  "functions": [
+    {
+      "name": "create_deck",
+      "description": "Start building a PowerPoint deck from a brief and source text. Spends credits.",
+      "capabilities": {
+        "confirmation": {
+          "type": "AdaptiveCard",
+          "title": "Build this deck with Kinsy?",
+          "body": "Kinsy will build the deck from what you described. It uses credits from your Kinsy account. Do you want to proceed?"
+        }
+      }
+    },
+    {
+      "name": "get_deck",
+      "description": "Check whether a deck is ready and get its links."
+    },
+    {
+      "name": "export_deck",
+      "description": "Get a fresh download link for a finished deck."
+    },
+    {
+      "name": "list_themes",
+      "description": "List the visual themes a deck can use."
+    }
+  ],
+  "runtimes": [
+    {
+      "type": "RemoteMCPServer",
+      "spec": {
+        "url": "https://mcp.kinsy.ai/mcp",
+        "mcp_tool_description": {
+          "file": "mcp-tools.json"
+        }
+      },
+      "run_for_functions": [
+        "create_deck",
+        "get_deck",
+        "export_deck",
+        "list_themes"
+      ],
+      "auth": {
+        "type": "OAuthPluginVault",
+        "reference_id": "${{KINSY_OAUTH_REFERENCE_ID}}"
+      }
+    }
+  ]
+}

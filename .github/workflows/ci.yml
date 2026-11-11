@@ -46,6 +46,7 @@ jobs:
       - run: pip install --require-hashes -r requirements.lock
       - run: pip install pytest==9.0.2
       - run: python -m pytest -q
+      - run: python -m pytest -q -p no:cacheprovider ../m365-agent/test
       - run: docker build -t kinsy-mcp:ci .
 
   plugin:
