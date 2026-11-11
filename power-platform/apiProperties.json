@@ -1,0 +1,45 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "API key",
+          "description": "A Kinsy API key (starts with ksy_live_). Create one at kinsy.ai under Settings, API keys.",
+          "tooltip": "Create a key at kinsy.ai under Settings, API keys.",
+          "constraints": {
+            "tabIndex": 2,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#0A2920",
+    "capabilities": [],
+    "publisher": "Kinsy",
+    "stackOwner": "Kinsy",
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Send the key as a bearer token",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Authorization",
+          "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Name the client",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "X-Kinsy-Client",
+          "x-ms-apimTemplateParameter.value": "power-platform/1.0",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      }
+    ]
+  }
+}
