@@ -151,6 +151,20 @@ describe("build", () => {
     expect(t.named("startBuild")[k][1].key).not.toBe(t.named("startBuild")[k - 1][1].key);
   });
 
+  it("treats an edited form as a new submission after a failure", async () => {
+    const answers = [{ ok: false, kind: "server", message: "x" }, { ok: true, deckId: "deck-1" }];
+    const t = await mount({ startBuild: () => answers.shift() });
+    type("Board update");
+    $("build").click();
+    await tick();
+    $("retry").click();
+    type("Board update for the investors");
+    $("build").click();
+    await tick();
+    const [first, second] = t.named("startBuild").map((c) => c[1].key);
+    expect(second).not.toBe(first);
+  });
+
   it("shows the credits view with the purchase link", async () => {
     await mount({ startBuild: () => ({ ok: false, kind: "credits", message: "needs 40" }) });
     type("Board update");
