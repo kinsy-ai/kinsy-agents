@@ -1,0 +1,345 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Kinsy",
+    "description": "Kinsy builds finished, editable PowerPoint decks from a brief and your source documents. Start a deck, check on it, and get links to the PowerPoint and PDF files.",
+    "version": "1.0",
+    "contact": {
+      "name": "Kinsy support",
+      "url": "https://kinsy.ai/contact",
+      "email": "support@kinsy.ai"
+    }
+  },
+  "host": "kinsy.ai",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/decks": {
+      "post": {
+        "operationId": "CreateDeck",
+        "summary": "Create a deck",
+        "description": "Starts building a finished PowerPoint deck from a brief and optional source text. Answers at once with a deck ID; the deck is usually ready in one to two minutes. Uses credits from your Kinsy account.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Idempotency key",
+            "description": "Send the same value when retrying so a retry returns the first deck and is not charged again.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "brief"
+              ],
+              "properties": {
+                "brief": {
+                  "type": "string",
+                  "x-ms-summary": "Brief",
+                  "description": "What the deck should say and who it is for.",
+                  "x-ms-visibility": "important"
+                },
+                "slides": {
+                  "type": "integer",
+                  "x-ms-summary": "Slides",
+                  "description": "Target slide count, from 4 to 25 (default 10).",
+                  "minimum": 4,
+                  "maximum": 25
+                },
+                "theme": {
+                  "type": "string",
+                  "x-ms-summary": "Theme",
+                  "description": "A theme ID from List themes. Leave empty to let Kinsy choose.",
+                  "x-ms-visibility": "advanced",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListThemes",
+                    "value-path": "id",
+                    "value-title": "name"
+                  }
+                },
+                "sources": {
+                  "type": "array",
+                  "x-ms-summary": "Sources",
+                  "description": "Documents the deck is built from, as text.",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "text"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "Source name",
+                        "description": "A short name, such as a file name."
+                      },
+                      "text": {
+                        "type": "string",
+                        "x-ms-summary": "Source text",
+                        "description": "The document's text."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The build has started.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deck_id": {
+                  "type": "string",
+                  "x-ms-summary": "Deck ID",
+                  "description": "Use it with Get a deck."
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status"
+                },
+                "status_url": {
+                  "type": "string",
+                  "x-ms-summary": "Status URL"
+                },
+                "credits_charged": {
+                  "type": "integer",
+                  "x-ms-summary": "Credits charged"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "The account does not have enough credits."
+          },
+          "default": {
+            "description": "The request failed."
+          }
+        }
+      }
+    },
+    "/decks/{deck_id}": {
+      "get": {
+        "operationId": "GetDeck",
+        "summary": "Get a deck",
+        "description": "Returns whether a deck is still building or finished and, once finished, links to download the PowerPoint and PDF files.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "deck_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Deck ID",
+            "description": "The deck ID from Create a deck."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deck.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deck_id": {
+                  "type": "string",
+                  "x-ms-summary": "Deck ID",
+                  "description": "The deck's identifier."
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "queued, running, done or error."
+                },
+                "progress": {
+                  "type": "number",
+                  "x-ms-summary": "Progress",
+                  "description": "From 0 to 1."
+                },
+                "slides_rendered": {
+                  "type": "integer",
+                  "x-ms-summary": "Slides ready"
+                },
+                "slides_total": {
+                  "type": "integer",
+                  "x-ms-summary": "Slides in total"
+                },
+                "title": {
+                  "type": "string",
+                  "x-ms-summary": "Title"
+                },
+                "error": {
+                  "type": "string",
+                  "x-ms-summary": "Error",
+                  "description": "Why the build stopped, when it failed."
+                },
+                "artifacts": {
+                  "type": "object",
+                  "x-ms-summary": "Files",
+                  "properties": {
+                    "pptx": {
+                      "type": "object",
+                      "x-ms-summary": "PowerPoint file",
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "x-ms-summary": "PowerPoint download link",
+                          "description": "Valid for one hour."
+                        },
+                        "filename": {
+                          "type": "string",
+                          "x-ms-summary": "PowerPoint file name"
+                        }
+                      }
+                    },
+                    "pdf": {
+                      "type": "object",
+                      "x-ms-summary": "PDF file",
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "x-ms-summary": "PDF download link",
+                          "description": "Valid for one hour."
+                        },
+                        "filename": {
+                          "type": "string",
+                          "x-ms-summary": "PDF file name"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such deck."
+          },
+          "default": {
+            "description": "The request failed."
+          }
+        }
+      }
+    },
+    "/themes": {
+      "get": {
+        "operationId": "ListThemes",
+        "summary": "List themes",
+        "description": "Lists the visual themes a deck can use.",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The themes.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "x-ms-summary": "Theme ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "x-ms-summary": "Theme name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "x-ms-summary": "Theme description"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "The request failed."
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "operationId": "GetAccount",
+        "summary": "Get account",
+        "description": "Returns the signed-in Kinsy account's plan and credit balance.",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The account.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "x-ms-summary": "Email"
+                },
+                "plan": {
+                  "type": "string",
+                  "x-ms-summary": "Plan"
+                },
+                "credits": {
+                  "type": "object",
+                  "x-ms-summary": "Credits",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "x-ms-summary": "Credits available"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "The request failed."
+          }
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://kinsy.ai"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://kinsy.ai/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Content and Files"
+    }
+  ]
+}
