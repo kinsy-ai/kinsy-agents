@@ -13,8 +13,9 @@ regex = '''ksy_[a-z]+_[A-Za-z0-9_-]{20,}'''
 keywords = ["ksy_"]
 
 [allowlist]
-description = "the test fixture key (a repeated letter), the masked form in docs"
+description = "the test fixture key (a repeated letter), the masked form in docs, the add-on tests' counting idempotency key"
 regexes = [
+  '''0123456789abcdef0123456789abcdef''',
   '''ksy_live_a{39}wxyz''',
   '''ksy_live_b{43}''',
   '''ksy_live_…''',
