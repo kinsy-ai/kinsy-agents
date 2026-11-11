@@ -47,7 +47,25 @@ jobs:
       - run: pip install pytest==9.0.2
       - run: python -m pytest -q
       - run: python -m pytest -q -p no:cacheprovider ../power-platform/test
+      - run: python -m pytest -q -p no:cacheprovider ../m365-agent/test
       - run: docker build -t kinsy-mcp:ci .
+
+  workspace-addon:
+    name: Google Workspace add-on
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workspace-addon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workspace-addon/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm audit --audit-level=high
 
   plugin:
     name: Skill and manifests

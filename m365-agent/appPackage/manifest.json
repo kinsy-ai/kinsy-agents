@@ -1,0 +1,34 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.30/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.30",
+  "version": "1.0.0",
+  "id": "e54493d3-5d15-49d8-8db7-1cf1ddbed97b",
+  "developer": {
+    "name": "Kinsy",
+    "websiteUrl": "https://kinsy.ai",
+    "privacyUrl": "https://kinsy.ai/privacy",
+    "termsOfUseUrl": "https://kinsy.ai/terms"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "Kinsy",
+    "full": "Kinsy"
+  },
+  "description": {
+    "short": "Finished, editable PowerPoint decks from a brief and your documents.",
+    "full": "Kinsy builds finished presentations. Describe the deck you need and who it is for, paste in the material it should be built from, and Kinsy returns an editable PowerPoint file with a clear storyline, charts, tables and pictures, laid out and ready to present. Figures your material does not support are flagged so you know what to check.\n\nHow it works: ask Kinsy for a deck and confirm. A deck takes about two minutes to build; ask Kinsy whether it is ready and you get a download link for the PowerPoint file and a link to review and edit the deck on the web.\n\nWhat you need: a Kinsy account. You can create one free the first time you sign in, and it comes with 100 credits, about one deck. A deck of up to 10 slides uses 40 credits, up to 16 slides 60, up to 25 slides 90, plus 10 for each generated picture. More credits or a monthly plan are bought from Kinsy on its website, not from Microsoft. Decks made on a free account carry a small Made with Kinsy mark.\n\nKinsy uses AI to plan and write decks. AI-generated content can be wrong: review a deck before you present it. To report a problem with something Kinsy produced, write to support@kinsy.ai."
+  },
+  "accentColor": "#F3F6F4",
+  "copilotAgents": {
+    "declarativeAgents": [
+      {
+        "id": "kinsy",
+        "file": "declarativeAgent.json"
+      }
+    ]
+  },
+  "validDomains": []
+}
