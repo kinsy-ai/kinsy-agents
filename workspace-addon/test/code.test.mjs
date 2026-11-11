@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { load, plain, response } from "./harness.mjs";
 
 const signedIn = { "kinsy.access": "acc1", "kinsy.refresh": "ref1" };
+const KEY = "0123456789abcdef0123456789abcdef";
 
 describe("menu", () => {
   it.each(["slides", "docs"])("adds one menu item in %s and touches nothing else", (host) => {
@@ -49,13 +50,13 @@ describe("build", () => {
 
   it("sends the brief and no document from Slides", () => {
     const env = load({ host: "slides", props: signedIn, fetch: created });
-    expect(plain(env.ctx.startBuild({ brief: "  Board update  ", slides: 12, useDocument: false }))).toEqual({ ok: true, deckId: "deck-9" });
+    expect(plain(env.ctx.startBuild({ key: KEY, brief: "  Board update  ", slides: 12, useDocument: false }))).toEqual({ ok: true, deckId: "deck-9" });
     expect(JSON.parse(env.calls[0].params.payload)).toEqual({ brief: "Board update", slides: 12, sources: [] });
   });
 
   it("sends the document as a source when asked to, in Docs", () => {
     const env = load({ host: "docs", props: signedIn, fetch: created, docText: "  Revenue grew 12%.  " });
-    expect(plain(env.ctx.startBuild({ brief: "", slides: 8, useDocument: true }))).toEqual({ ok: true, deckId: "deck-9" });
+    expect(plain(env.ctx.startBuild({ key: KEY, brief: "", slides: 8, useDocument: true }))).toEqual({ ok: true, deckId: "deck-9" });
     expect(JSON.parse(env.calls[0].params.payload)).toEqual({
       brief: "", slides: 8, sources: [{ name: "Q3 board notes", text: "Revenue grew 12%." }],
     });
@@ -63,45 +64,59 @@ describe("build", () => {
 
   it("does not read the document unless asked", () => {
     const env = load({ host: "docs", props: signedIn, fetch: created });
-    env.ctx.startBuild({ brief: "Board update", slides: 10 });
+    env.ctx.startBuild({ key: KEY, brief: "Board update", slides: 10 });
     expect(JSON.parse(env.calls[0].params.payload).sources).toEqual([]);
   });
 
   it("caps a very long document", () => {
-    const env = load({ host: "docs", props: signedIn, fetch: created, docText: "a".repeat(250000) });
-    env.ctx.startBuild({ brief: "", slides: 10, useDocument: true });
-    expect(JSON.parse(env.calls[0].params.payload).sources[0].text).toHaveLength(200000);
+    const env = load({ host: "docs", props: signedIn, fetch: created, docText: "a".repeat(150000) });
+    env.ctx.startBuild({ key: KEY, brief: "", slides: 10, useDocument: true });
+    expect(JSON.parse(env.calls[0].params.payload).sources[0].text).toHaveLength(120000);
   });
 
   it("cannot use a document from Slides", () => {
     const env = load({ host: "slides", props: signedIn, fetch: created });
-    expect(plain(env.ctx.startBuild({ brief: "", slides: 10, useDocument: true }))).toMatchObject({ ok: false, kind: "invalid" });
+    expect(plain(env.ctx.startBuild({ key: KEY, brief: "", slides: 10, useDocument: true }))).toMatchObject({ ok: false, kind: "invalid" });
     expect(env.calls).toHaveLength(0);
   });
 
   it("needs a brief or a document", () => {
     const env = load({ host: "slides", props: signedIn, fetch: created });
-    expect(plain(env.ctx.startBuild({ brief: "   ", slides: 10 }))).toMatchObject({ ok: false, kind: "invalid" });
+    expect(plain(env.ctx.startBuild({ key: KEY, brief: "   ", slides: 10 }))).toMatchObject({ ok: false, kind: "invalid" });
     const empty = load({ host: "docs", props: signedIn, fetch: created, docText: "  " });
-    expect(plain(empty.ctx.startBuild({ brief: "", slides: 10, useDocument: true }))).toMatchObject({ ok: false, kind: "invalid" });
+    expect(plain(empty.ctx.startBuild({ key: KEY, brief: "", slides: 10, useDocument: true }))).toMatchObject({ ok: false, kind: "invalid" });
     expect(env.calls.length + empty.calls.length).toBe(0);
+  });
+
+  it("names the submission so a repeat cannot be charged twice", () => {
+    const env = load({ props: signedIn, fetch: created });
+    env.ctx.startBuild({ key: KEY, brief: "x", slides: 10 });
+    expect(env.calls[0].params.headers["Idempotency-Key"]).toBe("gws-" + KEY);
+  });
+
+  it("refuses a submission without a well-formed key", () => {
+    const env = load({ props: signedIn, fetch: created });
+    for (const key of [undefined, "", "short", "has spaces in it 0123456789", "x".repeat(65), 42]) {
+      expect(plain(env.ctx.startBuild({ key, brief: "x", slides: 10 }))).toMatchObject({ ok: false, kind: "invalid" });
+    }
+    expect(env.calls).toHaveLength(0);
   });
 
   it("falls back to ten slides on a bad count", () => {
     const env = load({ props: signedIn, fetch: created });
-    env.ctx.startBuild({ brief: "x", slides: 99 });
-    env.ctx.startBuild({ brief: "x", slides: "abc" });
+    env.ctx.startBuild({ key: KEY, brief: "x", slides: 99 });
+    env.ctx.startBuild({ key: KEY, brief: "x", slides: "abc" });
     expect(env.calls.map((c) => JSON.parse(c.params.payload).slides)).toEqual([10, 10]);
   });
 
   it("answers out-of-credits as its own kind", () => {
     const env = load({ props: signedIn, fetch: () => response(402, { error: { message: "This deck needs 40 credits." } }) });
-    expect(plain(env.ctx.startBuild({ brief: "x", slides: 10 }))).toEqual({ ok: false, kind: "credits", message: "This deck needs 40 credits." });
+    expect(plain(env.ctx.startBuild({ key: KEY, brief: "x", slides: 10 }))).toEqual({ ok: false, kind: "credits", message: "This deck needs 40 credits." });
   });
 
   it("hides unexpected errors", () => {
     const env = load({ props: signedIn, fetch: () => ({ getResponseCode: () => { throw new Error("secret detail acc1"); } }) });
-    expect(plain(env.ctx.startBuild({ brief: "x", slides: 10 }))).toEqual({ ok: false, kind: "server", message: "Something went wrong. Try again." });
+    expect(plain(env.ctx.startBuild({ key: KEY, brief: "x", slides: 10 }))).toEqual({ ok: false, kind: "server", message: "Something went wrong. Try again." });
   });
 });
 

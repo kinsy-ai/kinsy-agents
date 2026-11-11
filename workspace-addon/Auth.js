@@ -98,8 +98,21 @@ function authCallback(e) {
   var q = (e && e.parameter) || {};
   var cache = CacheService.getUserCache();
   var key = 'pkce:' + String(q.n || '');
-  var verifier = q.n ? cache.get(key) : null;
-  if (verifier) cache.remove(key);
+  // One at a time, so a doubled request cannot redeem the same code twice
+  // (Kinsy ends a grant whose code is presented again).
+  var lock = LockService.getUserLock();
+  var verifier = null;
+  try {
+    lock.waitLock(15000);
+  } catch (err) {
+    return callbackPage_(false);
+  }
+  try {
+    verifier = q.n ? cache.get(key) : null;
+    if (verifier) cache.remove(key);
+  } finally {
+    lock.releaseLock();
+  }
   if (q.error || !q.code || !verifier) return callbackPage_(false);
   var out;
   try {
@@ -141,7 +154,8 @@ function refresh_(staleAccess) {
       throw fail_('server', 'Kinsy could not be reached. Check your connection and try again.');
     }
     if (out.status === 200 && storeTokens_(out.body)) return out.body.access_token;
-    if (out.status === 400 || out.status === 401) {
+    var refused = out.body.error === 'invalid_grant' || out.body.error === 'invalid_client';
+    if (out.status === 401 || (out.status === 400 && refused)) {
       clearTokens_();
       throw fail_('auth', 'Your sign-in has expired. Sign in again.');
     }

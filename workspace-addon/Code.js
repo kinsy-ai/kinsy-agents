@@ -69,7 +69,7 @@ function documentSource_() {
   };
 }
 
-// req: {brief, slides, useDocument}
+// req: {brief, slides, useDocument, key}. key names this submission.
 function startBuild(req) {
   return answer_(function () {
     req = req || {};
@@ -78,7 +78,9 @@ function startBuild(req) {
     if (!(slides >= 4 && slides <= 25)) slides = 10;
     var sources = req.useDocument === true ? [documentSource_()] : [];
     if (!brief && !sources.length) throw fail_('invalid', 'Describe the deck first.');
-    var out = createDeck_(brief, slides, sources);
+    var key = typeof req.key === 'string' && /^[A-Za-z0-9-]{16,64}$/.test(req.key) ? 'gws-' + req.key : '';
+    if (!key) throw fail_('invalid', 'Something went wrong. Close the panel and open it again.');
+    var out = createDeck_(brief, slides, sources, key);
     return { deckId: validDeckId_(out.deck_id) };
   });
 }

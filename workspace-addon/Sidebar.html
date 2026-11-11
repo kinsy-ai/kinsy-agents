@@ -96,7 +96,8 @@
         var POLL_MS = 3000, SIGNIN_POLL_MS = 2500, SIGNIN_LINK_MS = 9 * 60 * 1000;
         var MAX_BUILD_MS = 15 * 60 * 1000, MAX_POLL_FAILS = 5;
         var VIEWS = ['loading', 'signed-out', 'form', 'building', 'done', 'error'];
-        var state = { host: 'slides', pricingUrl: ORIGIN + '/pricing', signInTimer: null, linkTimer: null, run: 0 };
+        var SIGNIN_WAIT_MS = 10 * 60 * 1000;
+        var state = { host: 'slides', pricingUrl: ORIGIN + '/pricing', signInTimer: null, linkTimer: null, run: 0, creating: false, key: '' };
         var $ = function (id) { return document.getElementById(id); };
 
         // One call to the script. Always resolves to {ok, ...}.
@@ -132,9 +133,10 @@
           note('signin-note', message);
           $('signin').href = safeUrl(signInUrl, ORIGIN + '/oauth/authorize?');
           show('signed-out');
-          // The link is good for ten minutes; fetch a new one before then.
+          // The link is good for ten minutes; fetch a new one before then,
+          // unless a sign-in is under way (its own deadline renews it).
           clearTimeout(state.linkTimer);
-          state.linkTimer = setTimeout(function () { load(message); }, SIGNIN_LINK_MS);
+          state.linkTimer = setTimeout(function () { if (!state.signInTimer) load(message); }, SIGNIN_LINK_MS);
         }
         function load(message) {
           return call('getState').then(function (s) {
@@ -152,8 +154,15 @@
         $('signin').addEventListener('click', function (ev) {
           if ($('signin').getAttribute('href') === '#') { ev.preventDefault(); return; }
           if (state.signInTimer) return;
+          note('signin-note', '');
           $('signin-wait').hidden = false;
+          var deadline = Date.now() + SIGNIN_WAIT_MS;
           state.signInTimer = setInterval(function () {
+            if (Date.now() > deadline) {
+              stopSignInWatch();
+              load("Sign-in didn't finish. Select Sign in to try again.");
+              return;
+            }
             call('checkSignIn').then(function (s) {
               if (s.ok && s.signedIn && state.signInTimer) load();
             });
@@ -167,9 +176,19 @@
 
         // ---- form ----
         function usesDocument() { return state.host === 'docs' && $('use-doc').checked; }
-        function syncBuild() { $('build').disabled = !$('brief').value.trim() && !usesDocument(); }
-        $('brief').addEventListener('input', syncBuild);
-        $('use-doc').addEventListener('change', syncBuild);
+        function syncBuild() { $('build').disabled = state.creating || (!$('brief').value.trim() && !usesDocument()); }
+        // A changed form is a new submission; an unchanged one, sent again
+        // after a failure, reuses its key so it cannot be charged twice.
+        function changed() { state.key = ''; syncBuild(); }
+        function newKey() {
+          var a = new Uint8Array(16), s = '';
+          (window.crypto || window.msCrypto).getRandomValues(a);
+          for (var i = 0; i < a.length; i++) s += ('0' + a[i].toString(16)).slice(-2);
+          return s;
+        }
+        $('brief').addEventListener('input', changed);
+        $('use-doc').addEventListener('change', changed);
+        $('slides').addEventListener('change', changed);
 
         // ---- build ----
         function progress(d) {
@@ -196,12 +215,18 @@
         function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
         function build() {
+          if (state.creating) return;
           var run = ++state.run;
-          $('build').disabled = true;
-          var req = { brief: $('brief').value, slides: Number($('slides').value), useDocument: usesDocument() };
+          state.creating = true;
+          if (!state.key) state.key = newKey();
+          syncBuild();
+          var req = { brief: $('brief').value, slides: Number($('slides').value), useDocument: usesDocument(), key: state.key };
           call('startBuild', req).then(function (out) {
+            state.creating = false;
+            syncBuild();
             if (run !== state.run) return;
-            if (!out.ok) { syncBuild(); return fail(out); }
+            if (!out.ok) return fail(out);
+            state.key = '';
             progress(null);
             show('building');
             return watch(out.deckId, run, Date.now(), 0);

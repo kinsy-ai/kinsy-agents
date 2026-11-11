@@ -44,7 +44,8 @@ npm test          # the script runs under Node against fakes of the Apps Script 
 ```
 
 Push to an Apps Script project with [clasp](https://github.com/google/clasp) (`.claspignore`
-sends only the script's own files). The sign-in redirect is
+sends only the script's own files). The script's Google Cloud project needs the Google Drive API
+enabled for the upload. The sign-in redirect is
 `https://script.google.com/macros/d/{SCRIPT_ID}/usercallback`; Kinsy accepts only the one listed
 in `https://kinsy.ai/workspace-addon/oauth-client.json`, so a copy of this script under another
 id cannot sign in to Kinsy.

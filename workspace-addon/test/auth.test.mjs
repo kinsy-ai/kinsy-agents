@@ -48,6 +48,11 @@ describe("sign-in", () => {
     expect(env.calls[0].params.followRedirects).toBe(false);
     expect(env.props.data).toMatchObject({ "kinsy.access": "acc1", "kinsy.refresh": "ref1" });
     expect(env.cache[`pkce:${nonce}`]).toBeUndefined();     // single use
+    expect(env.lock.taken).toBe(1);                         // the verifier is claimed under the user lock
+    expect(env.lock.held).toBe(false);
+    // The same callback arriving again finds nothing to redeem.
+    expect(env.ctx.authCallback({ parameter: { code: "CODE", n: nonce } }).getContent()).toContain("Sign-in didn't finish");
+    expect(env.calls).toHaveLength(1);
     expect(env.ctx.signedIn_()).toBe(true);
   });
 
@@ -58,6 +63,14 @@ describe("sign-in", () => {
     expect(page.getContent()).toContain("Sign-in didn't finish");
     expect(env.calls).toHaveLength(0);
     expect(env.props.data).toEqual({});
+  });
+
+  it("stores nothing when another callback holds the lock", () => {
+    const env = load({ fetch: () => tokens(1) });
+    const { nonce } = startSignIn(env);
+    env.lock.busy = true;
+    expect(env.ctx.authCallback({ parameter: { code: "CODE", n: nonce } }).getContent()).toContain("Sign-in didn't finish");
+    expect(env.calls).toHaveLength(0);
   });
 
   it("stores nothing without this person's verifier", () => {
@@ -105,6 +118,18 @@ describe("refresh", () => {
     expect(() => env.ctx.refresh_("acc1")).toThrow(/sign-in has expired/i);
     expect(env.props.data).toEqual({});
     expect(env.lock.held).toBe(false);
+  });
+
+  it("keeps the tokens on a 400 that is not a refusal of the grant", () => {
+    const env = load({ props: signedIn, fetch: () => response(400, "<html>Bad Request</html>") });
+    expect(() => env.ctx.refresh_("acc1")).toThrow(/could not be reached/i);
+    expect(env.props.data).toMatchObject(signedIn);
+  });
+
+  it("keeps the tokens when the token endpoint is rate limited", () => {
+    const env = load({ props: signedIn, fetch: () => response(429, { error: "slow_down" }) });
+    expect(() => env.ctx.refresh_("acc1")).toThrow(/could not be reached/i);
+    expect(env.props.data).toMatchObject(signedIn);
   });
 
   it("keeps the tokens when Kinsy is briefly unreachable", () => {

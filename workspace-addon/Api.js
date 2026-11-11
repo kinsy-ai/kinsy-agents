@@ -7,7 +7,7 @@ function kindFor_(status) {
   return API_KIND_[status] || (status >= 500 ? 'server' : 'invalid');
 }
 
-function kinsyFetch_(method, url, body, access) {
+function kinsyFetch_(method, url, body, access, idempotencyKey) {
   if (url.indexOf(KINSY.ORIGIN + '/') !== 0) throw fail_('invalid', 'Refusing to call an address outside kinsy.ai.');
   var params = {
     method: method,
@@ -18,6 +18,7 @@ function kinsyFetch_(method, url, body, access) {
     muteHttpExceptions: true,
     followRedirects: false
   };
+  if (idempotencyKey) params.headers['Idempotency-Key'] = idempotencyKey;
   if (body !== undefined && body !== null) {
     params.contentType = 'application/json';
     params.payload = JSON.stringify(body);
@@ -30,14 +31,14 @@ function kinsyFetch_(method, url, body, access) {
 }
 
 // One call to /v1. A 401 gets one refresh and one retry.
-function kinsy_(method, path, body) {
+function kinsy_(method, path, body, idempotencyKey) {
   var access = props_().getProperty(KINSY.P_ACCESS);
   if (!access) throw fail_('auth', 'Sign in to Kinsy to continue.');
   var url = KINSY.API + path;
-  var res = kinsyFetch_(method, url, body, access);
+  var res = kinsyFetch_(method, url, body, access, idempotencyKey);
   if (res.getResponseCode() === 401) {
     access = refresh_(access);
-    res = kinsyFetch_(method, url, body, access);
+    res = kinsyFetch_(method, url, body, access, idempotencyKey);
   }
   var status = res.getResponseCode();
   var data = {};
@@ -64,8 +65,10 @@ function validDeckId_(deckId) {
   return deckId;
 }
 
-function createDeck_(brief, slides, sources) {
-  return kinsy_('post', '/decks', { brief: brief, slides: slides, sources: sources });
+// The key makes a repeated submission (a second click, a retry after a
+// timeout) return the first deck instead of building and charging again.
+function createDeck_(brief, slides, sources, idempotencyKey) {
+  return kinsy_('post', '/decks', { brief: brief, slides: slides, sources: sources }, idempotencyKey);
 }
 
 function deckStatus_(deckId) {

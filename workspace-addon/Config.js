@@ -17,7 +17,7 @@ var KINSY = {
   SLIDES_MIME: 'application/vnd.google-apps.presentation',
   PPTX_MIME: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   MAX_PPTX_BYTES: 50 * 1024 * 1024,   // UrlFetchApp's limit per call
-  MAX_DOC_CHARS: 200000,
+  MAX_DOC_CHARS: 120000,          // the API's limit for one source
   SIGN_IN_SECONDS: 600,
   P_ACCESS: 'kinsy.access',
   P_REFRESH: 'kinsy.refresh',
