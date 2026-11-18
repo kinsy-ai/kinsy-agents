@@ -9,9 +9,10 @@ const caught = (fn) => { try { fn(); } catch (e) { return { kind: e.kind, messag
 describe("manifest", () => {
   const m = JSON.parse(readFileSync(join(ROOT, "appsscript.json"), "utf8"));
 
-  it("asks for the five narrow scopes and nothing else", () => {
+  // Listed for Google Slides only (Marketplace review, 18 Nov 2026), so the
+  // Docs scope is not requested. The Docs code path stays for a later listing.
+  it("asks for the four narrow scopes and nothing else", () => {
     expect(m.oauthScopes.sort()).toEqual([
-      "https://www.googleapis.com/auth/documents.currentonly",
       "https://www.googleapis.com/auth/drive.file",
       "https://www.googleapis.com/auth/presentations.currentonly",
       "https://www.googleapis.com/auth/script.container.ui",
