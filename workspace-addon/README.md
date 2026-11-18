@@ -24,9 +24,11 @@ Scopes, all of Google's narrow kind:
 - `script.container.ui` — show the sidebar.
 - `script.external_request` — call Kinsy and upload to Drive.
 - `drive.file` — create the Slides file. Reaches only files this add-on created.
-- `presentations.currentonly`, `documents.currentonly` — run inside the open file. The document's
-  text is read only when you tick "Build from this document" and press Build; nothing is read
-  in Slides.
+- `presentations.currentonly` — run inside the open Slides file. Nothing in the file is read.
+
+The Marketplace listing is for Google Slides only (Google's review, 18 Nov 2026). The code that
+builds from an open Google Doc is still here but is not listed, and its scope
+(`documents.currentonly`) is not requested.
 
 Hosts it may call (`urlFetchWhitelist`): `kinsy.ai`, `storage.googleapis.com` (the deck
 download), `www.googleapis.com` (the Drive upload). Your Kinsy sign-in is sent only to
