@@ -19,11 +19,10 @@ Base URL `https://kinsy.ai/v1`. Every call except the catalogues, the spec and t
 
 ```json
 {"error": {"code": "insufficient_credits", "message": "…", "status": 402,
-           "docs_url": "https://kinsy.ai/docs/errors#insufficient_credits",
-           "checkout_url": "https://kinsy.ai/pricing?src=api"}}
+           "docs_url": "https://kinsy.ai/docs/errors#insufficient_credits"}}
 ```
 
-`401` the key is missing, invalid or revoked · `402` not enough credits (show `checkout_url`; nothing was charged) · `403` not your deck · `404` unknown deck · `422` invalid field · `429` rate limited (`retry_after` seconds) · `503` temporarily unavailable.
+`401` the key is missing, invalid or revoked · `402` not enough credits (say so and stop; nothing was charged) · `403` not your deck · `404` unknown deck · `422` invalid field · `429` rate limited (`retry_after` seconds) · `503` temporarily unavailable.
 
 ## Three calls, no CLI
 

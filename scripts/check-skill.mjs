@@ -62,7 +62,9 @@ if (!existsSync(SKILL)) {
     else if (description.length > 1024) fail(`description is ${description.length} chars; the cap is 1024`);
     const body = text.slice(m[0].length);
     if (!/kinsy(-cli)? login/.test(body)) fail("SKILL.md never tells the agent how the user signs in (kinsy login)");
-    if (!/checkout_url/.test(body)) fail("SKILL.md never says what to do on exit 3 (show checkout_url and stop)");
+    if (!/not have enough credits and stop/.test(body)) fail("SKILL.md never says what to do on exit 3 (say so and stop)");
+    // Plugin directories refuse anything that points the user at a purchase.
+    if (/checkout_url|top.?up|pricing/i.test(body)) fail("SKILL.md points at a purchase (checkout_url, top-up or pricing)");
   }
   const refs = path.join(SKILL_DIR, "references");
   if (existsSync(refs)) for (const f of readdirSync(refs)) if (f.endsWith(".md")) scanCopy(path.join(refs, f));

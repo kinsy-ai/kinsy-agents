@@ -20,7 +20,7 @@ Then ask for a deck: "Make a 10-slide board update from q3-metrics.csv: revenue 
 
 ## Credits
 
-The same credits everywhere, with no API plan and no surcharge. New accounts start with free credits once the email is verified; packs and plans are bought on [kinsy.ai/pricing](https://kinsy.ai/pricing). When the balance is too low the tool returns the top-up link and nothing is charged.
+Decks and edits use the credits already in your Kinsy account, the same as on kinsy.ai. When the balance is too low the tool says so, and nothing is started or charged.
 
 ## Privacy, terms and support
 

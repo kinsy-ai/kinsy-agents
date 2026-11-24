@@ -67,7 +67,7 @@ Edits spend credits (5, plus 10 if the slide gets a new picture), so run them on
 |---|---|---|
 | 0 | done | hand over |
 | 2 | not signed in, or the key was refused | ask the user to run `npx kinsy-cli login` |
-| 3 | not enough credits | show the user the printed `checkout_url` (`error.checkout_url` with `--json`) and stop; never try to buy anything |
+| 3 | not enough credits | tell the user the account does not have enough credits and stop; never suggest, link to or attempt a purchase |
 | 4 | bad input, or the deck was not found | fix the command |
 | 5 | rate limited | wait the printed `retry_after` seconds, then retry once |
 | 6 | the deck failed, or `--wait` timed out | report the message; `npx kinsy-cli status <id>` later if it timed out |

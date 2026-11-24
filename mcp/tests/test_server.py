@@ -224,17 +224,32 @@ async def test_create_deck_forwards_the_request_and_never_echoes_the_brief():
     assert "SECRET" not in out and GOOD not in out
 
 
-async def test_create_deck_402_is_an_error_with_the_top_up_link_and_no_charge():
+async def test_create_deck_402_explains_and_never_points_at_a_purchase():
+    # Plugin directories allow saying why a request cannot run; they do not
+    # allow a link to a page where something is bought, or a nudge to buy.
     fake = FakeApi({"POST /v1/decks": lambda r, n: httpx.Response(402, json=envelope(
-        402, "insufficient_credits", "Not enough credits for a 10-slide deck.",
+        402, "insufficient_credits",
+        "You're out of credits — this needs 40 and you have 0. Buy a credit pack at "
+        "/pricing#packs (packs never expire) or upgrade your plan.",
         checkout_url="https://kinsy.ai/pricing?src=api"))})
     async with Client(build(fake)) as c:
         r = await c.call_tool("create_deck", {"brief": "x"})
     assert r.is_error is True
-    out = text_of(r)
-    assert "https://kinsy.ai/pricing?src=mcp" in out
-    assert "nothing was charged" in out.lower()
-    assert "buy" not in out.lower()
+    out = text_of(r).lower()
+    assert "not have enough credits" in out
+    assert "nothing was charged" in out
+    assert "http" not in out and "pricing" not in out
+    for word in ("buy", "top up", "top-up", "upgrade", "purchase", "checkout"):
+        assert word not in out
+    assert "pricing" not in json.dumps(r.structured_content or {})
+
+
+def test_the_instructions_never_point_at_a_purchase():
+    from kinsy_mcp import server
+    text = server.INSTRUCTIONS.lower()
+    for word in ("top-up", "top up", "pricing", "upgrade", "checkout", "http"):
+        assert word not in text
+    assert not hasattr(server, "TOP_UP")
 
 
 async def test_create_deck_needs_a_brief_or_a_source():

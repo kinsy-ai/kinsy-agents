@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kinsy",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit) plus the kinsy skill for the CLI.",
   "author": {
     "name": "Kinsy",
@@ -83,7 +83,7 @@
               "prompt": "What is the weather in Singapore this weekend?"
             },
             {
-              "description": "Asking the plugin to buy credits",
+              "description": "Asking the plugin to buy something (it has no purchase tool and must not point at one)",
               "prompt": "Buy 500 Kinsy credits on my card."
             }
           ]
@@ -91,7 +91,7 @@
         "commerce": false
       },
       "publication": {
-        "release_notes": "First listing: the Kinsy MCP server (seven tools) and the kinsy skill."
+        "release_notes": "No purchase links or prompts anywhere: when an account does not have enough credits, the tools and the skill say so and stop."
       }
     }
   }
