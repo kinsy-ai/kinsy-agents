@@ -55,13 +55,13 @@ The web link for any deck is `https://kinsy.ai/deck/<deck_id>`.
 | 0 | done |
 | 1 | unexpected error |
 | 2 | not signed in, or the key was refused |
-| 3 | not enough credits; the top-up link is printed and nothing was charged |
+| 3 | not enough credits; nothing was charged |
 | 4 | bad input, or the deck was not found |
 | 5 | rate limited; `retry_after` seconds are printed |
 | 6 | the deck failed to build, or `--wait` timed out |
 | 7 | the server could not be reached, or answered with an error |
 
-With `--json`, an error is `{"error": {"code", "message", "status", "checkout_url"?, "retry_after"?, "docs_url"?}}` on stdout.
+With `--json`, an error is `{"error": {"code", "message", "status", "retry_after"?, "docs_url"?}}` on stdout.
 
 ## Limits
 

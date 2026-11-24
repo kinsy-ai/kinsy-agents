@@ -1,7 +1,7 @@
 {
   "name": "kinsy",
   "displayName": "Kinsy",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Finished, editable PowerPoint decks from a brief and your documents: Kinsy's remote MCP server (create, wait, download, edit, send to Google Slides) plus the kinsy skill.",
   "author": {
     "name": "Kinsy",
