@@ -11,10 +11,13 @@ describe("manifest", () => {
 
   // Listed for Google Slides only (Marketplace review, 18 Nov 2026), so the
   // Docs scope is not requested. The Docs code path stays for a later listing.
-  it("asks for the four narrow scopes and nothing else", () => {
+  // The deck goes into the presentation that is open (Marketplace review,
+  // 25 Nov 2026). Copying slides out of the converted working copy means
+  // opening it, which Apps Script allows only with the presentations scope.
+  it("asks for four scopes and nothing else", () => {
     expect(m.oauthScopes.sort()).toEqual([
       "https://www.googleapis.com/auth/drive.file",
-      "https://www.googleapis.com/auth/presentations.currentonly",
+      "https://www.googleapis.com/auth/presentations",
       "https://www.googleapis.com/auth/script.container.ui",
       "https://www.googleapis.com/auth/script.external_request",
     ]);

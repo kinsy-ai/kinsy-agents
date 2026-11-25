@@ -219,6 +219,18 @@ describe("build", () => {
     expect(t.named("pollDeck")).toHaveLength(n);                 // polling has stopped
   });
 
+  it("says the slides are in this presentation and offers no link out to another file", async () => {
+    await mount({ saveDeck: () => ({ ok: true, added: 10, title: "Q3 board update" }) });
+    type("Board update");
+    $("build").click();
+    await tick();
+    expect(visible()).toEqual(["done"]);
+    expect($("done-note").textContent).toBe("Added 10 slides to this presentation.");
+    expect($("open-slides").hidden).toBe(true);
+    expect($("save-again").hidden).toBe(true);
+    expect($("done-title").textContent).toBe("Q3 board update");
+  });
+
   it("offers to save again when Drive refuses, without rebuilding", async () => {
     const saves = [{ ok: false, kind: "drive_full", message: "Your Google Drive is full. Free some space, then save again." }, { ok: true, url: SLIDES_URL, title: "Q3 board update" }];
     const t = await mount({ saveDeck: () => saves.shift() });
