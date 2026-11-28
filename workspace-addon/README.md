@@ -2,7 +2,7 @@
 
 A Google Workspace Editor add-on (Apps Script). Open **Extensions → Kinsy → Build a deck** in
 Google Slides or Google Docs, describe the deck (in Docs you can build from the open document),
-and Kinsy puts a finished, editable Google Slides file in your own Drive.
+and Kinsy adds the finished, editable slides to the presentation you have open.
 
 Install it from the Google Workspace Marketplace once it is listed; this directory is the source.
 
@@ -13,20 +13,22 @@ Install it from the Google Workspace Marketplace once it is listed; this directo
 | `Code.js` | The menu, the sidebar, and the functions the sidebar calls. |
 | `Auth.js` | Sign-in at kinsy.ai (authorization code with PKCE, no client secret). |
 | `Api.js` | Calls to Kinsy's public API (`https://kinsy.ai/v1`). |
-| `Drive.js` | Downloads the finished pptx and saves it to Drive as Google Slides. |
+| `Drive.js` | Downloads the finished pptx, converts it in Drive, and copies its slides into the open presentation. |
 | `Sidebar.html` | The 300 px panel. It talks only to the script, never to the network. |
 | `Callback.html` | The page shown in the sign-in tab when it is finished. |
 
 ## What it can reach
 
-Scopes, all of Google's narrow kind:
+Scopes:
 
 - `script.container.ui` — show the sidebar.
 - `script.external_request` — call Kinsy and upload to Drive.
-- `drive.file` — create the Slides file. Reaches only files this add-on created.
-- `presentations.currentonly`, `documents.currentonly` — run inside the open file. The document's
-  text is read only when you tick "Build from this document" and press Build; nothing is read
-  in Slides.
+- `drive.file` — convert the finished deck in Drive, then remove that working copy. Reaches only files this add-on created.
+- `presentations` — copy the finished slides into the presentation that is open. Apps Script needs this scope to open the converted working copy; the add-on opens no other presentation and reads nothing from yours beyond checking whether it is still empty.
+
+The Marketplace listing is for Google Slides only (Google's review, 18 Nov 2026). The code that
+builds from an open Google Doc is still here but is not listed, and its scope
+(`documents.currentonly`) is not requested.
 
 Hosts it may call (`urlFetchWhitelist`): `kinsy.ai`, `storage.googleapis.com` (the deck
 download), `www.googleapis.com` (the Drive upload). Your Kinsy sign-in is sent only to

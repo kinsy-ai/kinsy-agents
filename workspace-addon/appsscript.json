@@ -6,8 +6,7 @@
     "https://www.googleapis.com/auth/script.container.ui",
     "https://www.googleapis.com/auth/script.external_request",
     "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/presentations.currentonly",
-    "https://www.googleapis.com/auth/documents.currentonly"
+    "https://www.googleapis.com/auth/presentations"
   ],
   "urlFetchWhitelist": [
     "https://kinsy.ai/",

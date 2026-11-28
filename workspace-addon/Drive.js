@@ -1,7 +1,9 @@
-// Puts a finished deck in the person's own Drive as a Google Slides file.
-// The pptx comes from Kinsy's signed download link (no token sent); the
-// upload uses the person's Google token with the drive.file scope, which
-// reaches only files this add-on created.
+// Puts a finished deck into the presentation that is open. The pptx comes
+// from Kinsy's signed download link (no token sent). Drive converts it into
+// a working copy (drive.file: only files this add-on created), its slides
+// are copied into the open presentation, and the working copy is removed.
+// Outside Slides there is no open presentation, so the copy is kept and
+// linked instead.
 
 function cleanTitle_(title) {
   var t = String(title || '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -108,8 +110,65 @@ function lastSave_() {
   }
 }
 
-// One save at a time per person, and one file per deck: pressing the
-// button again returns the file already made.
+function activePresentation_() {
+  try {
+    return SlidesApp.getActivePresentation() || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// A new presentation holds one slide of empty placeholders. Anything else
+// is the person's work and stays.
+function isBlank_(presentation) {
+  var slides = presentation.getSlides();
+  if (slides.length !== 1) return false;
+  var elements = slides[0].getPageElements();
+  for (var i = 0; i < elements.length; i++) {
+    if (String(elements[i].getPageElementType()) !== 'SHAPE') return false;
+    if (String(elements[i].asShape().getText().asString() || '').trim()) return false;
+  }
+  return true;
+}
+
+// Best effort: a working copy left behind is clutter, not a failure.
+function removeFile_(fileId) {
+  try {
+    UrlFetchApp.fetch(KINSY.FILES_URL + fileId, {
+      method: 'delete',
+      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+      muteHttpExceptions: true,
+      followRedirects: false
+    });
+  } catch (e) {
+    console.warn('kinsy.working_copy_left');
+  }
+}
+
+// Copies every slide of the working copy to the end of the open
+// presentation. All or nothing: a copy that stops half way is taken back,
+// so trying again never leaves two partial decks.
+function addSlides_(target, fileId) {
+  var added = [];
+  try {
+    var blank = isBlank_(target) ? target.getSlides()[0] : null;
+    var source = SlidesApp.openById(fileId).getSlides();
+    for (var i = 0; i < source.length; i++) added.push(target.appendSlide(source[i]));
+    if (!added.length) throw new Error('empty deck');
+    if (blank) blank.remove();
+  } catch (e) {
+    for (var j = added.length - 1; j >= 0; j--) {
+      try { added[j].remove(); } catch (ignored) { /* nothing more to do */ }
+    }
+    console.error('kinsy.add_slides_failed');
+    throw fail_('drive', "The slides couldn't be added to this presentation. Try again in a minute.");
+  }
+  try { added[0].selectAsCurrentPage(); } catch (ignored) { /* the slides are in; showing them is a nicety */ }
+  return added.length;
+}
+
+// One save at a time per person, and one copy per deck and presentation:
+// pressing the button again answers with what was already done.
 function saveToSlides_(deckId) {
   // Ask for the deck afresh (download links expire after an hour), and do
   // it before taking the lock: a token refresh takes the same lock.
@@ -119,14 +178,31 @@ function saveToSlides_(deckId) {
   var lock = LockService.getUserLock();
   if (!lock.tryLock(1000)) throw fail_('busy', 'Still saving. Give it a moment.');
   try {
+    var target = activePresentation_();
+    var targetId = target ? String(target.getId()) : '';
     var last = lastSave_();
-    if (last && last.deckId === deckId && /^[A-Za-z0-9_-]{10,}$/.test(String(last.fileId || ''))) {
-      return { url: slidesUrl_(last.fileId), title: String(last.title || '') };
+    if (last && last.deckId === deckId) {
+      if (target && last.presentationId === targetId && Number(last.added) > 0) {
+        return { added: Number(last.added), title: String(last.title || '') };
+      }
+      if (!target && /^[A-Za-z0-9_-]{10,}$/.test(String(last.fileId || ''))) {
+        return { url: slidesUrl_(last.fileId), title: String(last.title || '') };
+      }
     }
     var title = cleanTitle_(deck.title);
     var fileId = uploadAsSlides_(downloadPptx_(pptx.url), title);
-    props_().setProperty(KINSY.P_LAST_SAVE, JSON.stringify({ deckId: deckId, fileId: fileId, title: title }));
-    return { url: slidesUrl_(fileId), title: title };
+    if (!target) {
+      props_().setProperty(KINSY.P_LAST_SAVE, JSON.stringify({ deckId: deckId, fileId: fileId, title: title }));
+      return { url: slidesUrl_(fileId), title: title };
+    }
+    var added;
+    try {
+      added = addSlides_(target, fileId);
+    } finally {
+      removeFile_(fileId);
+    }
+    props_().setProperty(KINSY.P_LAST_SAVE, JSON.stringify({ deckId: deckId, presentationId: targetId, added: added, title: title }));
+    return { added: added, title: title };
   } finally {
     lock.releaseLock();
   }

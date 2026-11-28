@@ -68,9 +68,9 @@
 
     <section id="v-done" hidden>
       <h1 id="done-title">Your deck is ready</h1>
-      <p id="done-note" class="gray" role="status">Saved to your Google Drive as a Slides file.</p>
-      <a id="open-slides" class="button action wide" href="#" rel="noopener">Open in Google Slides</a>
-      <button id="save-again" class="action wide" type="button" hidden>Save to Google Slides</button>
+      <p id="done-note" class="gray" role="status">The slides are in this presentation.</p>
+      <a id="open-slides" class="button action wide" href="#" rel="noopener" hidden>Open in Google Slides</a>
+      <button id="save-again" class="action wide" type="button" hidden>Try again</button>
       <div class="links">
         <a id="done-kinsy" href="#" rel="noopener">Open in Kinsy</a>
         <button id="another" class="plain" type="button">Build another deck</button>
@@ -261,7 +261,7 @@
         }
         function save(deckId, run, title) {
           $('bar').style.width = '100%';
-          $('progress').textContent = 'Saving to Google Slides…';
+          $('progress').textContent = 'Adding the slides to this presentation…';
           show('building');
           $('save-again').disabled = true;
           return call('saveDeck', deckId).then(function (out) {
@@ -270,13 +270,18 @@
             if (!out.ok && out.kind === 'auth') return load(out.message);
             $('done-title').textContent = (out.ok && out.title) || title || 'Your deck is ready';
             $('done-kinsy').href = deckUrl(deckId);
-            $('open-slides').hidden = !out.ok;
+            // In Slides the deck lands in the open presentation (out.added);
+            // only outside Slides is there a separate file to link to.
+            var inPlace = out.ok && out.added > 0;
+            $('open-slides').hidden = !out.ok || inPlace;
             $('save-again').hidden = out.ok;
-            if (out.ok) {
+            if (inPlace) {
+              $('done-note').textContent = 'Added ' + out.added + (out.added === 1 ? ' slide' : ' slides') + ' to this presentation.';
+            } else if (out.ok) {
               $('open-slides').href = safeUrl(out.url, 'https://docs.google.com/presentation/d/');
               $('done-note').textContent = 'Saved to your Google Drive as a Slides file.';
             } else {
-              $('done-note').textContent = (out.message || "It couldn't be saved to Google Slides.") + ' The deck is safe in Kinsy.';
+              $('done-note').textContent = (out.message || "The slides couldn't be added to this presentation.") + ' The deck is safe in Kinsy.';
               $('save-again').onclick = function () { save(deckId, run, title); };
             }
             show('done');

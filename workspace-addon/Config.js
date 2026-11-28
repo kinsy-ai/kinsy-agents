@@ -14,6 +14,7 @@ var KINSY = {
   DOWNLOAD_PREFIX: 'https://storage.googleapis.com/',
   UPLOAD_URL: 'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id',
   UPLOAD_PREFIX: 'https://www.googleapis.com/upload/drive/v3/files',
+  FILES_URL: 'https://www.googleapis.com/drive/v3/files/',
   SLIDES_MIME: 'application/vnd.google-apps.presentation',
   PPTX_MIME: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   MAX_PPTX_BYTES: 50 * 1024 * 1024,   // UrlFetchApp's limit per call

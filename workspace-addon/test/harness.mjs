@@ -55,6 +55,46 @@ export function load(opts = {}) {
     getContent() { return this.content; },
   });
 
+  // A presentation is a list of slides; a slide is a list of text shapes.
+  // opts.slides: the open presentation's slides, each an array of the text
+  // in its shapes (default: one slide with two empty placeholders, which is
+  // what a new presentation holds).
+  const opened = [];
+  const selected = [];
+  function slide(list, texts, title) {
+    const s = {
+      title,
+      getPageElements: () => texts.map((t) => ({
+        getPageElementType: () => (t === null ? "IMAGE" : "SHAPE"),
+        asShape: () => ({ getText: () => ({ asString: () => t }) }),
+      })),
+      remove() { list.splice(list.indexOf(s), 1); },
+      selectAsCurrentPage() { selected.push(s.title); },
+    };
+    return s;
+  }
+  function presentation(id, slides) {
+    const list = [];
+    for (const [i, texts] of slides.entries()) {
+      list.push(Array.isArray(texts) ? slide(list, texts, `own-${i + 1}`) : slide(list, ["x"], texts));
+    }
+    let appended = 0;
+    return {
+      list,
+      getId: () => id,
+      getName: () => "My slides",
+      getSlides: () => list.slice(),
+      appendSlide(src) {
+        appended += 1;
+        if (opts.failAppendAt === appended) throw new Error("Service error: Slides");
+        const copy = slide(list, ["x"], src.title);
+        list.push(copy);
+        return copy;
+      },
+    };
+  }
+  const active = presentation("PRES-OPEN-0001", opts.slides ?? [["", ""]]);
+
   const ctx = {
     console,
     JSON,
@@ -110,7 +150,15 @@ export function load(opts = {}) {
       },
     },
     SlidesApp: host === "slides"
-      ? { getUi: () => ui, getActivePresentation: () => ({ getName: () => "My slides" }) }
+      ? {
+          getUi: () => ui,
+          getActivePresentation: () => active,
+          openById(id) {
+            opened.push(id);
+            if (opts.openById) return opts.openById(id);
+            return presentation(id, opts.sourceSlides ?? ["Cover", "Agenda", "Close"]);
+          },
+        }
       : { getUi: wrongHost("SlidesApp.getUi()"), getActivePresentation: wrongHost("SlidesApp.getActivePresentation()") },
     DocumentApp: host === "docs"
       ? {
@@ -124,7 +172,7 @@ export function load(opts = {}) {
   };
   vm.createContext(ctx);
   for (const f of SOURCES) vm.runInContext(readFileSync(join(ROOT, f), "utf8"), ctx, { filename: f });
-  return { ctx, props, cache, calls, lock, menu, shown };
+  return { ctx, props, cache, calls, lock, menu, shown, active, opened, selected };
 }
 
 // Plain copy of a value made inside the vm (other-realm prototypes).
